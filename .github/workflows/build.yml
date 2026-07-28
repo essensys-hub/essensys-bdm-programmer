@@ -1,0 +1,57 @@
+# Reusable job: build BP_MQX_ETH.s19/.elf/.map from essensys-gcc.
+#
+# Runs on ubuntu-latest (no hardware access needed for a cross-build) using
+# the pre-built essensys-builder image. Checks out essensys-gcc at the
+# given ref (default: the tag that triggered the caller workflow) and runs
+# its own build.sh — this repo does not vendor or duplicate the m68k-elf-gcc
+# toolchain or build logic (library-first: essensys-gcc owns the build).
+#
+# specs/flash-pipeline/spec.md: "Image flashée conforme à essensys-gcc" —
+# the artifact this job produces is the *raw* build output; crc-inject.yml
+# is the only workflow allowed to hand a .s19 to the flash job.
+name: build
+
+on:
+  workflow_call:
+    inputs:
+      essensys_gcc_ref:
+        description: "essensys-gcc git ref to build (tag/branch/sha)"
+        required: true
+        type: string
+    outputs:
+      artifact_name:
+        description: "Name of the uploaded raw build artifact"
+        value: ${{ jobs.build.outputs.artifact_name }}
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/essensys-hub/essensys-gcc/essensys-builder:latest
+    outputs:
+      artifact_name: bp-mqx-eth-raw
+    steps:
+      - name: Checkout essensys-gcc
+        uses: actions/checkout@v4
+        with:
+          repository: essensys-hub/essensys-gcc
+          ref: ${{ inputs.essensys_gcc_ref }}
+          path: essensys-gcc
+
+      - name: Build bp (BP_MQX_ETH)
+        working-directory: essensys-gcc
+        run: ./build.sh bp
+
+      - name: Upload raw build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: bp-mqx-eth-raw
+          path: |
+            essensys-gcc/bp/build/bp/*.s19
+            essensys-gcc/bp/build/bp/*.elf
+            essensys-gcc/bp/build/bp/*.map
+          if-no-files-found: error
+          retention-days: 30

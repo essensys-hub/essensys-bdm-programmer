@@ -1,0 +1,46 @@
+# Reusable job: publish the flash job's PASS/FAIL summary.
+#
+# specs/flash-pipeline/spec.md: "le pipeline ne prétend jamais à un succès
+# partiel" — this job only republishes what `flash` already computed, it
+# never re-derives or overrides the status.
+name: report
+
+on:
+  workflow_call:
+    inputs:
+      status:
+        required: true
+        type: string
+      report_artifact_name:
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download flash report
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.report_artifact_name }}
+          path: report
+
+      - name: Publish summary
+        run: |
+          {
+            echo "## Flash pipeline result: ${{ inputs.status }}"
+            if [ -f report/report.md ]; then
+              cat report/report.md
+            else
+              echo "(no report.md found in flash artifact)"
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Fail the job if flash did not PASS
+        if: ${{ inputs.status != 'PASS' }}
+        run: |
+          echo "::error::flash job reported status=${{ inputs.status }} — see summary"
+          exit 1

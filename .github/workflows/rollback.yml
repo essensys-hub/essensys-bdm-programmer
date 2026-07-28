@@ -1,0 +1,107 @@
+# Dedicated rollback workflow — deliberately separate from pipeline.yml so
+# "flash a new version" and "restore a previous backup" can never be
+# confused (specs/flash-pipeline/spec.md "Workflow de rollback disponible
+# et testé").
+#
+# Manual only. NEVER triggers on pull_request (same fork-safety rule as
+# pipeline.yml/flash.yml — the runner is self-hosted and cabled to real
+# hardware).
+name: rollback
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_serial:
+        description: "Dedicated test board serial to roll back"
+        required: true
+        type: string
+      backup_artifact_name:
+        description: >
+          Name of a previously uploaded flash-report-<serial> artifact
+          containing the pre-flash backup .s19 to restore
+        required: true
+        type: string
+      transport:
+        description: "BDM transport (usbdm|gpio) — see flash.yml default"
+        required: false
+        type: string
+        default: usbdm
+      confirm:
+        description: "Type 'yes' to confirm this rollback"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  rollback:
+    if: ${{ github.event.inputs.confirm == 'yes' }}
+    runs-on: [self-hosted, rpi4, bdm, sc944d]
+    environment: hardware-flash
+    steps:
+      - name: Checkout essensys-bdm-programmer
+        uses: actions/checkout@v4
+
+      - name: Install bdm-programmer
+        run: pip install .
+
+      - name: Download backup artifact to restore
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.backup_artifact_name }}
+          path: backup
+
+      - name: Locate the backup .s19
+        id: locate
+        run: |
+          set -euo pipefail
+          s19=$(find backup -name 'backup-*.s19' | sort | tail -n1)
+          test -n "$s19"
+          echo "s19=$s19" >> "$GITHUB_OUTPUT"
+
+      # Reflashing the recorded backup is itself gated by the same
+      # backup-before-write interlock: a fresh backup of the CURRENT
+      # (post-incident) state is taken before the restore write, so a
+      # rollback can never itself violate the "never write before backup"
+      # rule. Each `run:` step is a separate process — capture the sidecar
+      # record path and pass it explicitly (see flash.yml for the same
+      # pattern and backup.py `load_backup_record`).
+      - name: backup current (pre-rollback) state
+        id: backup
+        run: |
+          set -euo pipefail
+          bdm-programmer --transport ${{ inputs.transport }} \
+            --serial ${{ inputs.target_serial }} \
+            backup --out-dir ./pre-rollback-backups | tee backup.txt
+          record=$(grep '^backup: record=' backup.txt | cut -d= -f2-)
+          test -n "$record"
+          echo "record=$record" >> "$GITHUB_OUTPUT"
+
+      - name: erase-app
+        run: >
+          bdm-programmer --transport ${{ inputs.transport }} --serial ${{ inputs.target_serial }}
+          --backup-record "${{ steps.backup.outputs.record }}" erase-app
+
+      - name: program (restore from backup)
+        run: >
+          bdm-programmer --transport ${{ inputs.transport }} --serial ${{ inputs.target_serial }}
+          --backup-record "${{ steps.backup.outputs.record }}"
+          program "${{ steps.locate.outputs.s19 }}"
+
+      - name: verify
+        run: >
+          bdm-programmer --transport ${{ inputs.transport }} --serial ${{ inputs.target_serial }}
+          verify "${{ steps.locate.outputs.s19 }}"
+
+      - name: reset
+        run: bdm-programmer --transport ${{ inputs.transport }} --serial ${{ inputs.target_serial }} reset
+
+      - name: Upload pre-rollback backup
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pre-rollback-backup-${{ inputs.target_serial }}
+          path: pre-rollback-backups/*
+          if-no-files-found: warn
+          retention-days: 90

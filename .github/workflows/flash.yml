@@ -1,0 +1,152 @@
+# Reusable job: backup -> erase-app -> program -> verify -> reset, on the
+# self-hosted Pi 4 runner permanently cabled to the dedicated SC944D test
+# board (never a production board — OpenSpec decision D5).
+#
+# Gate: `environment: hardware-flash` requires human reviewer approval
+# (configure this environment in repo Settings -> Environments) before this
+# job is allowed to start, per specs/flash-pipeline/spec.md "Gate reviewer
+# humain obligatoire avant le job flash".
+#
+# Fork safety (E9 / specs/flash-pipeline/spec.md "Runner self-hosted jamais
+# exposé aux PR de forks"): this workflow is only ever `workflow_call`'d
+# from pipeline.yml, which itself never triggers on `pull_request` — see
+# the comment there. Do not add a `pull_request` trigger to this file.
+name: flash
+
+on:
+  workflow_call:
+    inputs:
+      crc_injected_artifact_name:
+        required: true
+        type: string
+      target_serial:
+        description: "Identifier of the dedicated test board"
+        required: true
+        type: string
+      transport:
+        description: >
+          BDM transport. Defaults to usbdm (Piste 1, MVP recommendation).
+          Will raise NotImplementedError until tasks.md section 2's POC
+          validation lands — this is intentional: a self-hosted job must
+          never silently "succeed" against hardware it cannot actually
+          reach.
+        required: false
+        type: string
+        default: usbdm
+    outputs:
+      status:
+        value: ${{ jobs.flash.outputs.status }}
+      report_artifact_name:
+        value: ${{ jobs.flash.outputs.report_artifact_name }}
+
+permissions:
+  contents: read
+
+jobs:
+  flash:
+    runs-on: [self-hosted, rpi4, bdm, sc944d]
+    environment: hardware-flash
+    outputs:
+      status: ${{ steps.report.outputs.status }}
+      report_artifact_name: flash-report-${{ inputs.target_serial }}
+    steps:
+      - name: Checkout essensys-bdm-programmer
+        uses: actions/checkout@v4
+
+      - name: Install bdm-programmer
+        run: pip install .
+
+      - name: Download CRC-injected artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.crc_injected_artifact_name }}
+          path: image
+
+      - name: Locate the CRC-injected .s19
+        id: locate
+        run: |
+          set -euo pipefail
+          s19=$(find image -name '*.s19' | head -n1)
+          test -n "$s19"
+          echo "s19=$s19" >> "$GITHUB_OUTPUT"
+
+      # Interlock (a): identity check before any write — see
+      # "Identification de la cible avant écriture" in specs/bdm-programmer.
+      - name: dump-info (pre-write identity + version/CRC)
+        run: >
+          bdm-programmer --transport ${{ inputs.transport }}
+          --serial ${{ inputs.target_serial }} info
+          | tee before.txt
+
+      # Interlock (b): backup-before-write — the CLI itself refuses
+      # erase-app/program without this succeeding first. Each `run:` step
+      # is a SEPARATE process, so the in-memory backup interlock does not
+      # by itself carry over — capture the sidecar record path here and
+      # pass it explicitly to every later step via --backup-record (see
+      # backup.py `load_backup_record`, which re-verifies on load rather
+      # than trusting the file blindly).
+      - name: backup (recovery-grade, hors-machine)
+        id: backup
+        run: |
+          set -euo pipefail
+          bdm-programmer --transport ${{ inputs.transport }} \
+            --serial ${{ inputs.target_serial }} backup --out-dir ./backups \
+            | tee backup.txt
+          record=$(grep '^backup: record=' backup.txt | cut -d= -f2-)
+          test -n "$record"
+          echo "record=$record" >> "$GITHUB_OUTPUT"
+
+      - name: erase-app (0x3000-0x7DFFF only)
+        run: >
+          bdm-programmer --transport ${{ inputs.transport }}
+          --serial ${{ inputs.target_serial }}
+          --backup-record "${{ steps.backup.outputs.record }}" erase-app
+
+      - name: program (CRC-injected image only)
+        run: >
+          bdm-programmer --transport ${{ inputs.transport }}
+          --serial ${{ inputs.target_serial }}
+          --backup-record "${{ steps.backup.outputs.record }}"
+          program "${{ steps.locate.outputs.s19 }}"
+
+      - name: verify (readback, byte-for-byte)
+        run: >
+          bdm-programmer --transport ${{ inputs.transport }}
+          --serial ${{ inputs.target_serial }}
+          verify "${{ steps.locate.outputs.s19 }}"
+
+      - name: reset + post-boot confirmation
+        run: >
+          bdm-programmer --transport ${{ inputs.transport }}
+          --serial ${{ inputs.target_serial }} reset
+          | tee after.txt
+
+      - name: Build report
+        id: report
+        if: always()
+        run: |
+          status="FAIL"
+          if [ -f after.txt ] && grep -q "reset: OK" after.txt; then
+            status="PASS"
+          fi
+          echo "status=$status" >> "$GITHUB_OUTPUT"
+          {
+            echo "# Flash report — ${{ inputs.target_serial }}"
+            echo "status: $status"
+            echo "## before"; cat before.txt || true
+            echo "## after"; cat after.txt || true
+          } > report.md
+
+      # Full backup (.bin/.s19) is stored as an artifact — "hors-machine",
+      # per specs/bdm-programmer/spec.md — but never printed to job logs;
+      # only the sha256/version/CRC metadata above appear in step output.
+      - name: Upload backup + report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: flash-report-${{ inputs.target_serial }}
+          path: |
+            report.md
+            backups/*
+          if-no-files-found: warn
+          retention-days: 90

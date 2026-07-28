@@ -1,0 +1,74 @@
+# Reusable job: patch the CRC-16 at 0x3000 into the raw .s19 from `build`.
+#
+# Consumes bdm_programmer.crc_inject (this repo — see README "CRC-16
+# algorithm — confirmed, not guessed"). Per OpenSpec decision D4, this
+# tool exists to unblock the pipeline while essensys-gcc#14 is outstanding;
+# reconcile with essensys-gcc's own tool if/when it ships, do not run both.
+#
+# specs/bdm-programmer/spec.md: "Refus de programmer une image sans CRC-16
+# injecté" — this job's whole purpose is to make that refusal a non-issue
+# for the `flash` job by construction, and it fails loudly if the injector
+# itself refuses (e.g. image overlaps CFM).
+name: crc-inject
+
+on:
+  workflow_call:
+    inputs:
+      raw_artifact_name:
+        required: true
+        type: string
+    outputs:
+      artifact_name:
+        description: "Name of the uploaded CRC-injected .s19 artifact"
+        value: ${{ jobs.crc-inject.outputs.artifact_name }}
+
+permissions:
+  contents: read
+
+jobs:
+  crc-inject:
+    runs-on: ubuntu-latest
+    outputs:
+      artifact_name: bp-mqx-eth-crc-injected
+    steps:
+      - name: Checkout essensys-bdm-programmer
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install bdm-programmer
+        run: pip install .
+
+      - name: Download raw build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.raw_artifact_name }}
+          path: raw
+
+      - name: Locate the .s19
+        id: locate
+        run: |
+          set -euo pipefail
+          s19=$(find raw -name '*.s19' | head -n1)
+          if [ -z "$s19" ]; then
+            echo "::error::no .s19 found in raw build artifact" >&2
+            exit 1
+          fi
+          echo "s19=$s19" >> "$GITHUB_OUTPUT"
+
+      - name: Inject CRC-16
+        run: |
+          mkdir -p out
+          crc-inject "${{ steps.locate.outputs.s19 }}" \
+            -o "out/$(basename "${{ steps.locate.outputs.s19 }}" .s19)-crc.s19"
+
+      - name: Upload CRC-injected artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: bp-mqx-eth-crc-injected
+          path: out/*.s19
+          if-no-files-found: error
+          retention-days: 30

@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "bdm-programmer"
+version = "0.1.0"
+description = "BDM programmer POC for essensys-board-SC944D (MCF52259, ColdFire V2)"
+requires-python = ">=3.10"
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest>=7"]
+
+[project.scripts]
+bdm-programmer = "bdm_programmer.cli:main"
+crc-inject = "bdm_programmer.crc_inject:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

@@ -1,0 +1,67 @@
+# Top-level orchestrator: build -> crc-inject -> flash -> report.
+#
+# Triggers ONLY on protected tags (fw-v*) or manual workflow_dispatch —
+# NEVER on `pull_request`. This is deliberate and load-bearing: the `flash`
+# job below runs on a self-hosted runner permanently cabled to real
+# hardware (`[self-hosted, rpi4, bdm, sc944d]`), and per specs/flash-
+# pipeline/spec.md "Runner self-hosted jamais exposé aux PR de forks" (E9
+# in the framing prompt), that runner must never execute code from an
+# untrusted pull_request, fork or otherwise. Do not add a pull_request
+# trigger to this workflow or to flash.yml.
+name: pipeline
+
+on:
+  push:
+    tags:
+      - "fw-v*"
+  workflow_dispatch:
+    inputs:
+      essensys_gcc_ref:
+        description: "essensys-gcc ref to build"
+        required: true
+        type: string
+      target_serial:
+        description: "Dedicated test board serial (never a production board — D5)"
+        required: true
+        type: string
+        default: "sc944d-test-01"
+      transport:
+        description: "BDM transport (usbdm|gpio) — see flash.yml default"
+        required: false
+        type: string
+        default: usbdm
+      confirm:
+        description: "Type 'yes' to confirm you intend to flash the test board"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    if: ${{ github.event_name != 'workflow_dispatch' || github.event.inputs.confirm == 'yes' }}
+    uses: ./.github/workflows/build.yml
+    with:
+      essensys_gcc_ref: ${{ inputs.essensys_gcc_ref || github.ref_name }}
+
+  crc-inject:
+    needs: build
+    uses: ./.github/workflows/crc-inject.yml
+    with:
+      raw_artifact_name: ${{ needs.build.outputs.artifact_name }}
+
+  flash:
+    needs: crc-inject
+    uses: ./.github/workflows/flash.yml
+    with:
+      crc_injected_artifact_name: ${{ needs.crc-inject.outputs.artifact_name }}
+      target_serial: ${{ inputs.target_serial || 'sc944d-test-01' }}
+      transport: ${{ inputs.transport || 'usbdm' }}
+
+  report:
+    needs: flash
+    uses: ./.github/workflows/report.yml
+    with:
+      status: ${{ needs.flash.outputs.status }}
+      report_artifact_name: ${{ needs.flash.outputs.report_artifact_name }}
