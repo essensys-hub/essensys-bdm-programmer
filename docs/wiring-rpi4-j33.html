@@ -1,0 +1,439 @@
+<title>Câblage BDM — SC944D J33 ↔ Raspberry Pi 4</title>
+<style>
+  :root{
+    --bg:#eceef1; --panel:#f7f8fa; --panel-2:#ffffff; --ink:#1a1f27; --ink-2:#525c69;
+    --line:#d3d8df; --line-strong:#b9c0c9;
+    --copper:#b5722e; --copper-soft:#e6c9a8;
+    --out:#0f7d92;      /* Pi -> cible (sortie) */
+    --in:#7b4bc4;       /* cible -> Pi (entrée) */
+    --od:#b26a00;       /* open-drain (RESET) */
+    --sense:#2f7d4f;    /* +3V3S sense */
+    --gnd:#5b6472;      /* GND */
+    --nc:#9aa2ad;       /* non connecté */
+    --danger:#b3261e; --danger-bg:#fbe9e7;
+    --mono:ui-monospace,"SF Mono","Cascadia Code",Menlo,Consolas,monospace;
+    --sans:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{
+      --bg:#12151a; --panel:#191d24; --panel-2:#1f242c; --ink:#e8ecf1; --ink-2:#9aa4b1;
+      --line:#2b313a; --line-strong:#3a424e;
+      --copper:#d99a55; --copper-soft:#5a4526;
+      --out:#3cc4dc; --in:#b28bff; --od:#e0a34a; --sense:#5fc98a; --gnd:#8b95a4; --nc:#5c6572;
+      --danger:#ff6b5e; --danger-bg:#2c1614;
+    }
+  }
+  :root[data-theme="light"]{
+    --bg:#eceef1; --panel:#f7f8fa; --panel-2:#ffffff; --ink:#1a1f27; --ink-2:#525c69;
+    --line:#d3d8df; --line-strong:#b9c0c9; --copper:#b5722e; --copper-soft:#e6c9a8;
+    --out:#0f7d92; --in:#7b4bc4; --od:#b26a00; --sense:#2f7d4f; --gnd:#5b6472; --nc:#9aa2ad;
+    --danger:#b3261e; --danger-bg:#fbe9e7;
+  }
+  :root[data-theme="dark"]{
+    --bg:#12151a; --panel:#191d24; --panel-2:#1f242c; --ink:#e8ecf1; --ink-2:#9aa4b1;
+    --line:#2b313a; --line-strong:#3a424e; --copper:#d99a55; --copper-soft:#5a4526;
+    --out:#3cc4dc; --in:#b28bff; --od:#e0a34a; --sense:#5fc98a; --gnd:#8b95a4; --nc:#5c6572;
+    --danger:#ff6b5e; --danger-bg:#2c1614;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);
+    line-height:1.55;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1040px;margin:0 auto;padding:32px 22px 72px}
+  header.top{border-bottom:2px solid var(--copper);padding-bottom:18px;margin-bottom:8px}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--copper);margin:0 0 8px}
+  h1{font-size:clamp(24px,4vw,34px);line-height:1.12;margin:0 0 6px;text-wrap:balance;letter-spacing:-.01em}
+  .sub{color:var(--ink-2);margin:0;max-width:62ch}
+  h2{font-size:19px;letter-spacing:-.01em;margin:40px 0 14px;display:flex;align-items:baseline;gap:10px}
+  h2 .n{font-family:var(--mono);font-size:13px;color:var(--copper);font-weight:600}
+  p{max-width:66ch}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px 20px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  @media(max-width:720px){.grid2{grid-template-columns:1fr}}
+
+  /* danger banner */
+  .banner{display:flex;gap:14px;align-items:flex-start;background:var(--danger-bg);
+    border:1px solid var(--danger);border-radius:12px;padding:15px 18px;margin:20px 0 4px}
+  .banner .mk{font-family:var(--mono);font-weight:700;color:var(--danger);font-size:13px;
+    border:1.5px solid var(--danger);border-radius:6px;padding:2px 7px;white-space:nowrap;margin-top:2px}
+  .banner b{color:var(--danger)}
+  .banner ul{margin:6px 0 0;padding-left:18px}
+  .banner li{margin:3px 0}
+
+  /* connector visual */
+  .conn{background:var(--panel-2);border:1px solid var(--line-strong);border-radius:10px;padding:16px}
+  .conn .cap{font-family:var(--mono);font-size:12px;color:var(--ink-2);letter-spacing:.08em;
+    text-transform:uppercase;margin:0 0 12px;display:flex;justify-content:space-between}
+  .header10{display:grid;grid-template-columns:1fr 22px 1fr;gap:8px 10px;align-items:stretch}
+  .notch{grid-column:2;justify-self:center;align-self:start;width:14px;height:10px;border:1px solid var(--line-strong);
+    border-top:none;border-radius:0 0 8px 8px;margin-bottom:2px}
+  .pin{display:flex;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--line);
+    border-radius:7px;padding:6px 8px;font-size:13px;min-height:40px}
+  .pin.r{flex-direction:row-reverse;text-align:right}
+  .pin .num{font-family:var(--mono);font-weight:700;font-size:12px;width:20px;height:20px;flex:none;
+    display:grid;place-items:center;border-radius:50%;background:var(--copper);color:#fff}
+  .pin .sig{font-family:var(--mono);font-weight:600;letter-spacing:.02em}
+  .pin .role{display:block;font-size:11px;color:var(--ink-2);font-family:var(--sans);font-weight:400}
+  .pin.r .body{margin-left:auto}
+
+  /* direction chips */
+  .chip{font-family:var(--mono);font-size:10.5px;font-weight:700;letter-spacing:.06em;
+    padding:2px 6px;border-radius:5px;white-space:nowrap;border:1px solid transparent}
+  .c-out{color:var(--out);border-color:var(--out);background:color-mix(in srgb,var(--out) 12%,transparent)}
+  .c-in{color:var(--in);border-color:var(--in);background:color-mix(in srgb,var(--in) 12%,transparent)}
+  .c-od{color:var(--od);border-color:var(--od);background:color-mix(in srgb,var(--od) 12%,transparent)}
+  .c-sense{color:var(--sense);border-color:var(--sense);background:color-mix(in srgb,var(--sense) 12%,transparent)}
+  .c-gnd{color:var(--gnd);border-color:var(--gnd);background:color-mix(in srgb,var(--gnd) 14%,transparent)}
+  .c-nc{color:var(--nc);border-color:var(--nc);background:transparent}
+
+  .legend{display:flex;flex-wrap:wrap;gap:8px 14px;margin:14px 0 0;font-size:12.5px;color:var(--ink-2)}
+  .legend span{display:inline-flex;align-items:center;gap:6px}
+  .dot{width:10px;height:10px;border-radius:3px;flex:none}
+
+  /* table */
+  .twrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px}
+  table{border-collapse:collapse;width:100%;font-size:13.5px;min-width:640px}
+  th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line)}
+  thead th{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;
+    color:var(--ink-2);background:var(--panel);position:sticky;top:0}
+  tbody tr:last-child td{border-bottom:none}
+  td .m{font-family:var(--mono);font-weight:600}
+  td.sig{font-family:var(--mono);font-weight:700}
+  .tabnum{font-variant-numeric:tabular-nums}
+
+  /* schematic svg */
+  .schem{background:var(--panel-2);border:1px solid var(--line);border-radius:12px;padding:8px}
+  .schem svg{display:block;width:100%;height:auto}
+  .stext{font-family:var(--mono);font-size:12px;fill:var(--ink)}
+  .stext.sm{font-size:10.5px;fill:var(--ink-2)}
+  .sbox{fill:var(--panel);stroke:var(--line-strong)}
+
+  ul.notes{padding-left:18px;margin:8px 0 0}
+  ul.notes li{margin:6px 0;max-width:70ch}
+  .tag{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--copper);
+    border:1px solid var(--copper);border-radius:5px;padding:1px 6px;letter-spacing:.04em}
+  .tag.lever{color:var(--danger);border-color:var(--danger)}
+  code{font-family:var(--mono);font-size:.9em;background:var(--panel-2);border:1px solid var(--line);
+    padding:1px 5px;border-radius:4px}
+  footer{margin-top:44px;padding-top:16px;border-top:1px solid var(--line);color:var(--ink-2);font-size:12.5px}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <p class="eyebrow">Guide de câblage · Piste 2 (bit-bang GPIO)</p>
+    <h1>SC944D — connecteur BDM J33 → Raspberry Pi 4</h1>
+    <p class="sub">Raccordement du port de debug ColdFire (MCF52259) au Pi pour lecture/backup et
+    programmation flash. Brochage sourcé du schéma ; directions sourcées du Reference Manual NXP §33.2.</p>
+  </header>
+
+  <div class="banner">
+    <span class="mk">STOP</span>
+    <div>
+      <b>À vérifier avant tout branchement :</b>
+      <ul>
+        <li>Le cavalier <b>JC1</b> doit être <b>monté (= mode BDM)</b> — sinon J33 est en mode JTAG et le protocole ne répondra pas. <span class="tag lever">À LEVER</span> position physique de JC1.</li>
+        <li>Logique <b>3,3 V uniquement</b>. Le GPIO du Pi 4 n'est pas tolérant 5 V. Mesure la tension cible (+3V3S) au multimètre avant de câbler.</li>
+        <li>Ne relie <b>jamais</b> le <b>+3V3S</b> de la carte au rail 3,3 V du Pi (pas de rétro-alimentation) — c'est une entrée de <b>détection</b> seulement.</li>
+        <li>Alimente la carte par sa propre alim ; connecte la <b>masse commune en premier</b>.</li>
+      </ul>
+    </div>
+  </div>
+
+  <h2><span class="n">01</span> Les deux connecteurs</h2>
+  <div class="grid2">
+    <div class="conn">
+      <p class="cap"><span>J33 · carte SC944D</span><span>2×5 · 2,54 mm</span></p>
+      <div class="header10">
+        <div class="notch"></div>
+        <!-- left column: odd pins 1,3,5,7,9 ; right column: even 2,4,6,8,10 -->
+        <div class="pin"><span class="num">1</span><span class="body"><span class="sig">TCLK</span><span class="role">horloge JTAG</span></span><span class="chip c-nc">NC</span></div>
+        <div class="pin r"><span class="num">2</span><span class="body"><span class="sig">BKPT</span><span class="role">breakpoint</span></span><span class="chip c-out">OUT</span></div>
+
+        <div class="pin"><span class="num">3</span><span class="body"><span class="sig">DSO</span><span class="role">data out</span></span><span class="chip c-in">IN</span></div>
+        <div class="pin r"><span class="num">4</span><span class="body"><span class="sig">DSI</span><span class="role">data in</span></span><span class="chip c-out">OUT</span></div>
+
+        <div class="pin"><span class="num">5</span><span class="body"><span class="sig">ALLPST</span><span class="role">statut halted</span></span><span class="chip c-in">IN·opt</span></div>
+        <div class="pin r"><span class="num">6</span><span class="body"><span class="sig">DSCLK</span><span class="role">horloge série</span></span><span class="chip c-out">OUT</span></div>
+
+        <div class="pin"><span class="num">7</span><span class="body"><span class="sig">+3V3S</span><span class="role">VDD cible</span></span><span class="chip c-sense">SENSE</span></div>
+        <div class="pin r"><span class="num">8</span><span class="body"><span class="sig">RESET</span><span class="role">reset MCU</span></span><span class="chip c-od">OD</span></div>
+
+        <div class="pin"><span class="num">9</span><span class="body"><span class="sig">GND</span></span><span class="chip c-gnd">GND</span></div>
+        <div class="pin r"><span class="num">10</span><span class="body"><span class="sig">GND</span></span><span class="chip c-gnd">GND</span></div>
+      </div>
+      <div class="legend">
+        <span><i class="dot" style="background:var(--out)"></i>OUT — Pi → cible</span>
+        <span><i class="dot" style="background:var(--in)"></i>IN — cible → Pi</span>
+        <span><i class="dot" style="background:var(--od)"></i>OD — open-drain</span>
+        <span><i class="dot" style="background:var(--sense)"></i>SENSE</span>
+        <span><i class="dot" style="background:var(--nc)"></i>NC — non connecté</span>
+      </div>
+    </div>
+
+    <div class="conn">
+      <p class="cap"><span>Raspberry Pi 4 · GPIO</span><span>mapping proposé</span></p>
+      <div class="header10">
+        <div class="notch" style="visibility:hidden"></div>
+        <div class="pin"><span class="num" style="background:var(--out)">23</span><span class="body"><span class="sig">GPIO11</span><span class="role">→ DSCLK</span></span><span class="chip c-out">OUT</span></div>
+        <div class="pin r"><span class="num" style="background:var(--out)">19</span><span class="body"><span class="sig">GPIO10</span><span class="role">→ DSI</span></span><span class="chip c-out">OUT</span></div>
+
+        <div class="pin"><span class="num" style="background:var(--in)">21</span><span class="body"><span class="sig">GPIO9</span><span class="role">← DSO</span></span><span class="chip c-in">IN</span></div>
+        <div class="pin r"><span class="num" style="background:var(--out)">22</span><span class="body"><span class="sig">GPIO25</span><span class="role">→ BKPT</span></span><span class="chip c-out">OUT</span></div>
+
+        <div class="pin"><span class="num" style="background:var(--od)">18</span><span class="body"><span class="sig">GPIO24</span><span class="role">↔ RESET</span></span><span class="chip c-od">OD</span></div>
+        <div class="pin r"><span class="num" style="background:var(--in)">16</span><span class="body"><span class="sig">GPIO23</span><span class="role">← ALLPST</span></span><span class="chip c-in">IN·opt</span></div>
+
+        <div class="pin"><span class="num" style="background:var(--sense)">24</span><span class="body"><span class="sig">GPIO8</span><span class="role">← +3V3S</span></span><span class="chip c-sense">SENSE</span></div>
+        <div class="pin r"><span class="num" style="background:var(--gnd)">6</span><span class="body"><span class="sig">GND</span><span class="role">masse</span></span><span class="chip c-gnd">GND</span></div>
+      </div>
+      <p style="font-size:12px;color:var(--ink-2);margin:12px 0 0">Numéro = broche physique du header 40 pts.
+      GPIO9/10/11 = broches SPI0, ici utilisées en <b>GPIO simple</b> (bit-bang), pas en SPI matériel.
+      Mapping <b>modifiable</b> dans le logiciel — c'est une proposition, pas une contrainte silicium.</p>
+    </div>
+  </div>
+
+  <h2><span class="n">02</span> Table de câblage</h2>
+  <div class="twrap">
+    <table>
+      <thead>
+        <tr><th>J33</th><th>Signal</th><th>Direction</th><th>Protection en série</th><th>Pi 4 (BCM / phys)</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="m tabnum">6</td><td class="sig">DSCLK</td><td><span class="chip c-out">Pi → cible</span></td><td>R série 100–330 Ω</td><td class="m">GPIO11 / <span class="tabnum">23</span></td></tr>
+        <tr><td class="m tabnum">4</td><td class="sig">DSI</td><td><span class="chip c-out">Pi → cible</span></td><td>R série 100–330 Ω</td><td class="m">GPIO10 / <span class="tabnum">19</span></td></tr>
+        <tr><td class="m tabnum">3</td><td class="sig">DSO</td><td><span class="chip c-in">cible → Pi</span></td><td>R série 100–330 Ω</td><td class="m">GPIO9 / <span class="tabnum">21</span></td></tr>
+        <tr><td class="m tabnum">2</td><td class="sig">BKPT</td><td><span class="chip c-out">Pi → cible</span></td><td>R série 100–330 Ω</td><td class="m">GPIO25 / <span class="tabnum">22</span></td></tr>
+        <tr><td class="m tabnum">8</td><td class="sig">RESET</td><td><span class="chip c-od">open-drain</span></td><td>R série + drive OD</td><td class="m">GPIO24 / <span class="tabnum">18</span></td></tr>
+        <tr><td class="m tabnum">5</td><td class="sig">ALLPST</td><td><span class="chip c-in">cible → Pi</span></td><td>R série (optionnel)</td><td class="m">GPIO23 / <span class="tabnum">16</span></td></tr>
+        <tr><td class="m tabnum">7</td><td class="sig">+3V3S</td><td><span class="chip c-sense">sense</span></td><td>R série (jamais sur le rail Pi)</td><td class="m">GPIO8 / <span class="tabnum">24</span></td></tr>
+        <tr><td class="m tabnum">9·10</td><td class="sig">GND</td><td><span class="chip c-gnd">masse</span></td><td>— (relier en premier)</td><td class="m">GND / <span class="tabnum">6·9·14…</span></td></tr>
+        <tr><td class="m tabnum">1</td><td class="sig">TCLK</td><td><span class="chip c-nc">NC</span></td><td>—</td><td class="m">— <span class="tag lever" style="margin-left:4px">À LEVER</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2><span class="n">03</span> Vue breadboard (style Fritzing)</h2>
+  <div class="schem">
+    <svg viewBox="0 0 960 600" role="img" aria-label="Représentation physique d'un Raspberry Pi 4 relié au connecteur J33 de la carte SC944D par des fils de couleur">
+      <!-- ===== SC944D board fragment + J33 ===== -->
+      <rect x="690" y="70" width="210" height="230" rx="12" fill="#26333f" stroke="#3a4a58" stroke-width="2"/>
+      <text class="stext" x="795" y="94" text-anchor="middle" style="fill:#cdd7e0;font-weight:700">SC944D</text>
+      <text class="stext sm" x="795" y="110" text-anchor="middle" style="fill:#8ea0b0">MCF52259</text>
+      <!-- J33 connector body -->
+      <rect x="716" y="122" width="108" height="166" rx="6" fill="#15181c" stroke="#0a0c0e" stroke-width="1.5"/>
+      <text class="stext sm" x="770" y="140" text-anchor="middle" style="fill:#7f8b98">J33 · 2×5</text>
+      <!-- J33 pins: left col 1,3,5,7,9 (x=740) ; right col 2,4,6,8,10 (x=800) -->
+      <g>
+        <circle cx="740" cy="158" r="6" fill="#3a3f45" stroke="#0a0c0e"/><!-- 1 NC -->
+        <circle cx="800" cy="158" r="6" fill="var(--out)"/><!-- 2 BKPT -->
+        <circle cx="740" cy="190" r="6" fill="var(--in)"/><!-- 3 DSO -->
+        <circle cx="800" cy="190" r="6" fill="var(--out)"/><!-- 4 DSI -->
+        <circle cx="740" cy="222" r="6" fill="var(--in)"/><!-- 5 ALLPST -->
+        <circle cx="800" cy="222" r="6" fill="var(--out)"/><!-- 6 DSCLK -->
+        <circle cx="740" cy="254" r="6" fill="var(--sense)"/><!-- 7 +3V3S -->
+        <circle cx="800" cy="254" r="6" fill="var(--od)"/><!-- 8 RESET -->
+        <circle cx="740" cy="286" r="6" fill="var(--gnd)"/><!-- 9 GND -->
+        <circle cx="800" cy="286" r="6" fill="var(--gnd)"/><!-- 10 GND -->
+      </g>
+      <g class="stext sm" style="fill:#9aa7b3">
+        <text x="726" y="152" text-anchor="end">1</text><text x="814" y="152" text-anchor="start">2</text>
+        <text x="726" y="184" text-anchor="end">3</text><text x="814" y="184" text-anchor="start">4</text>
+        <text x="726" y="216" text-anchor="end">5</text><text x="814" y="216" text-anchor="start">6</text>
+        <text x="726" y="248" text-anchor="end">7</text><text x="814" y="248" text-anchor="start">8</text>
+        <text x="726" y="280" text-anchor="end">9</text><text x="814" y="280" text-anchor="start">10</text>
+      </g>
+      <text class="stext sm" x="795" y="304" text-anchor="middle" style="fill:var(--danger)">⚠ JC1 = mode BDM</text>
+
+      <!-- ===== Raspberry Pi 4 board ===== -->
+      <rect x="52" y="250" width="612" height="300" rx="16" fill="#166b33" stroke="#0e4a22" stroke-width="2"/>
+      <text class="stext" x="360" y="470" text-anchor="middle" style="fill:#dff3e6;font-weight:700">Raspberry Pi 4 Model B</text>
+      <!-- SoC -->
+      <rect x="300" y="360" width="96" height="96" rx="6" fill="#111" stroke="#000"/>
+      <text class="stext sm" x="348" y="412" text-anchor="middle" style="fill:#9aa">BCM2711</text>
+      <!-- RAM -->
+      <rect x="300" y="330" width="60" height="22" rx="3" fill="#1c1c1c" stroke="#000"/>
+      <!-- Ports right edge -->
+      <rect x="636" y="300" width="34" height="30" rx="3" fill="#c9ccce" stroke="#8a9095"/><!-- ethernet -->
+      <rect x="636" y="342" width="34" height="26" rx="3" fill="#2b6cb0" stroke="#1a4a80"/><!-- usb3 -->
+      <rect x="636" y="374" width="34" height="26" rx="3" fill="#2b6cb0" stroke="#1a4a80"/><!-- usb3 -->
+      <rect x="636" y="406" width="34" height="26" rx="3" fill="#20242a" stroke="#000"/><!-- usb2 -->
+      <!-- Ports left edge -->
+      <rect x="46" y="470" width="16" height="22" rx="2" fill="#20242a" stroke="#000"/><!-- usb-c -->
+      <rect x="46" y="500" width="16" height="20" rx="2" fill="#20242a" stroke="#000"/><!-- hdmi -->
+      <text class="stext sm" x="54" y="466" text-anchor="middle" style="fill:#bfe3cc">PWR</text>
+      <!-- microSD bottom -->
+      <rect x="150" y="542" width="60" height="14" rx="2" fill="#20242a" stroke="#000"/>
+
+      <!-- GPIO header strip -->
+      <rect x="104" y="272" width="536" height="48" rx="4" fill="#141414" stroke="#000"/>
+      <text class="stext sm" x="118" y="338" text-anchor="start" style="fill:#bfe3cc">Header GPIO 40 broches — broche 1 ⟵</text>
+      <!-- 40 pins: odd row y=284, even row y=308, x = 118 + i*26 -->
+      <g fill="#e8c760" stroke="#b8952f" stroke-width="0.5">
+        <circle cx="118" cy="284" r="4.5"/><circle cx="144" cy="284" r="4.5"/><circle cx="170" cy="284" r="4.5"/><circle cx="196" cy="284" r="4.5"/><circle cx="222" cy="284" r="4.5"/><circle cx="248" cy="284" r="4.5"/><circle cx="274" cy="284" r="4.5"/><circle cx="300" cy="284" r="4.5"/><circle cx="326" cy="284" r="4.5"/><circle cx="352" cy="284" r="4.5"/><circle cx="378" cy="284" r="4.5"/><circle cx="404" cy="284" r="4.5"/><circle cx="430" cy="284" r="4.5"/><circle cx="456" cy="284" r="4.5"/><circle cx="482" cy="284" r="4.5"/><circle cx="508" cy="284" r="4.5"/><circle cx="534" cy="284" r="4.5"/><circle cx="560" cy="284" r="4.5"/><circle cx="586" cy="284" r="4.5"/><circle cx="612" cy="284" r="4.5"/>
+        <circle cx="118" cy="308" r="4.5"/><circle cx="144" cy="308" r="4.5"/><circle cx="170" cy="308" r="4.5"/><circle cx="196" cy="308" r="4.5"/><circle cx="222" cy="308" r="4.5"/><circle cx="248" cy="308" r="4.5"/><circle cx="274" cy="308" r="4.5"/><circle cx="300" cy="308" r="4.5"/><circle cx="326" cy="308" r="4.5"/><circle cx="352" cy="308" r="4.5"/><circle cx="378" cy="308" r="4.5"/><circle cx="404" cy="308" r="4.5"/><circle cx="430" cy="308" r="4.5"/><circle cx="456" cy="308" r="4.5"/><circle cx="482" cy="308" r="4.5"/><circle cx="508" cy="308" r="4.5"/><circle cx="534" cy="308" r="4.5"/><circle cx="560" cy="308" r="4.5"/><circle cx="586" cy="308" r="4.5"/><circle cx="612" cy="308" r="4.5"/>
+      </g>
+
+      <!-- ===== jumper wires (Pi header pin -> J33 pin) ===== -->
+      <g fill="none" stroke-width="4.5" stroke-linecap="round">
+        <!-- GND: pin6(170,308) -> J33-9(740,286) -->
+        <path d="M170 308 C170 400, 740 380, 740 286" stroke="var(--gnd)"/>
+        <!-- +3V3S: pin24(404,308) -> J33-7(740,254) -->
+        <path d="M404 308 C404 420, 740 360, 740 254" stroke="var(--sense)"/>
+        <!-- RESET: pin18(326,308) -> J33-8(800,254) -->
+        <path d="M326 308 C326 440, 800 360, 800 254" stroke="var(--od)"/>
+        <!-- ALLPST: pin16(300,308) -> J33-5(740,222) -->
+        <path d="M300 308 C300 410, 740 330, 740 222" stroke="var(--in)"/>
+        <!-- BKPT: pin22(378,308) -> J33-2(800,158) -->
+        <path d="M378 308 C378 430, 800 300, 800 158" stroke="var(--out)"/>
+        <!-- DSCLK: pin23(404,284) -> J33-6(800,222) -->
+        <path d="M404 284 C404 200, 800 320, 800 222" stroke="var(--out)"/>
+        <!-- DSI: pin19(352,284) -> J33-4(800,190) -->
+        <path d="M352 284 C352 180, 800 290, 800 190" stroke="var(--out)"/>
+        <!-- DSO: pin21(378,284) -> J33-3(740,190) -->
+        <path d="M378 284 C378 160, 740 280, 740 190" stroke="var(--in)"/>
+      </g>
+      <!-- highlighted Pi pins on top of wires -->
+      <g stroke="#fff" stroke-width="1.5">
+        <circle cx="170" cy="308" r="6.5" fill="var(--gnd)"/>
+        <circle cx="404" cy="308" r="6.5" fill="var(--sense)"/>
+        <circle cx="326" cy="308" r="6.5" fill="var(--od)"/>
+        <circle cx="300" cy="308" r="6.5" fill="var(--in)"/>
+        <circle cx="378" cy="308" r="6.5" fill="var(--out)"/>
+        <circle cx="404" cy="284" r="6.5" fill="var(--out)"/>
+        <circle cx="352" cy="284" r="6.5" fill="var(--out)"/>
+        <circle cx="378" cy="284" r="6.5" fill="var(--in)"/>
+      </g>
+      <!-- pin callouts -->
+      <g class="stext sm" text-anchor="middle" style="fill:var(--ink-2)">
+        <text x="170" y="278">6</text>
+        <text x="300" y="278">16</text>
+        <text x="326" y="278">18</text>
+        <text x="378" y="330">22</text>
+        <text x="404" y="330">24</text>
+        <text x="352" y="278">19</text>
+        <text x="404" y="272">23</text>
+        <text x="378" y="272">21</text>
+      </g>
+    </svg>
+    <div class="legend" style="padding:6px 12px 10px">
+      <span><i class="dot" style="background:var(--out)"></i>DSCLK · DSI · BKPT (OUT)</span>
+      <span><i class="dot" style="background:var(--in)"></i>DSO · ALLPST (IN)</span>
+      <span><i class="dot" style="background:var(--od)"></i>RESET (open-drain)</span>
+      <span><i class="dot" style="background:var(--sense)"></i>+3V3S (sense)</span>
+      <span><i class="dot" style="background:var(--gnd)"></i>GND</span>
+    </div>
+    <p style="font-size:12px;color:var(--ink-2);margin:4px 4px 6px">Vue de dessus stylisée. Les fils partent des 8 broches
+    utilisées du header 40 pts (numéros = broche physique) vers J33. Les résistances série / buffer ne sont pas figurés
+    ici — voir le schéma électrique ci-dessous.</p>
+  </div>
+
+  <h2><span class="n">04</span> Schéma de raccordement</h2>
+  <div class="schem">
+    <svg viewBox="0 0 960 380" role="img" aria-label="Schéma Pi 4 vers J33 avec résistances série et étage open-drain sur RESET">
+      <!-- Pi block -->
+      <rect class="sbox" x="24" y="40" width="150" height="300" rx="10"/>
+      <text class="stext" x="99" y="66" text-anchor="middle" style="font-weight:700">Raspberry Pi 4</text>
+      <text class="stext sm" x="99" y="84" text-anchor="middle">GPIO 3,3 V</text>
+      <!-- J33 block -->
+      <rect class="sbox" x="786" y="40" width="150" height="300" rx="10"/>
+      <text class="stext" x="861" y="66" text-anchor="middle" style="font-weight:700">J33 · SC944D</text>
+      <text class="stext sm" x="861" y="84" text-anchor="middle">MCF52259 BDM</text>
+      <!-- protection column -->
+      <text class="stext sm" x="480" y="30" text-anchor="middle">R série 100–330 Ω (+ buffer 74LVC recommandé)</text>
+
+      <!-- helper: 5 signal rows -->
+      <!-- row y positions -->
+      <g stroke-width="2.5" fill="none">
+        <!-- DSCLK out -->
+        <line x1="174" y1="120" x2="430" y2="120" stroke="var(--out)"/>
+        <rect x="430" y="110" width="40" height="20" rx="3" fill="var(--panel-2)" stroke="var(--line-strong)" stroke-width="1"/>
+        <line x1="470" y1="120" x2="786" y2="120" stroke="var(--out)"/>
+        <!-- DSI out -->
+        <line x1="174" y1="160" x2="430" y2="160" stroke="var(--out)"/>
+        <rect x="430" y="150" width="40" height="20" rx="3" fill="var(--panel-2)" stroke="var(--line-strong)" stroke-width="1"/>
+        <line x1="470" y1="160" x2="786" y2="160" stroke="var(--out)"/>
+        <!-- BKPT out -->
+        <line x1="174" y1="200" x2="430" y2="200" stroke="var(--out)"/>
+        <rect x="430" y="190" width="40" height="20" rx="3" fill="var(--panel-2)" stroke="var(--line-strong)" stroke-width="1"/>
+        <line x1="470" y1="200" x2="786" y2="200" stroke="var(--out)"/>
+        <!-- DSO in -->
+        <line x1="174" y1="240" x2="430" y2="240" stroke="var(--in)"/>
+        <rect x="430" y="230" width="40" height="20" rx="3" fill="var(--panel-2)" stroke="var(--line-strong)" stroke-width="1"/>
+        <line x1="470" y1="240" x2="786" y2="240" stroke="var(--in)"/>
+        <!-- RESET open-drain -->
+        <line x1="174" y1="292" x2="360" y2="292" stroke="var(--od)"/>
+        <line x1="470" y1="292" x2="786" y2="292" stroke="var(--od)"/>
+      </g>
+
+      <!-- arrowheads (direction) -->
+      <g>
+        <polygon points="786,120 774,114 774,126" fill="var(--out)"/>
+        <polygon points="786,160 774,154 774,166" fill="var(--out)"/>
+        <polygon points="786,200 774,194 774,206" fill="var(--out)"/>
+        <polygon points="174,240 186,234 186,246" fill="var(--in)"/>
+      </g>
+
+      <!-- labels -->
+      <g class="stext sm">
+        <text x="300" y="113" text-anchor="middle">DSCLK → 6</text>
+        <text x="300" y="153" text-anchor="middle">DSI → 4</text>
+        <text x="300" y="193" text-anchor="middle">BKPT → 2</text>
+        <text x="300" y="233" text-anchor="middle">DSO ← 3</text>
+      </g>
+
+      <!-- open-drain detail: transistor pulling RESET low + pull-up on target side -->
+      <g>
+        <circle cx="415" cy="292" r="16" fill="var(--panel)" stroke="var(--od)" stroke-width="1.5"/>
+        <text class="stext sm" x="415" y="296" text-anchor="middle" style="fill:var(--od)">Q</text>
+        <text class="stext sm" x="415" y="330" text-anchor="middle">MOSFET N (open-drain)</text>
+        <!-- pull-up on target -->
+        <line x1="720" y1="292" x2="720" y2="255" stroke="var(--line-strong)" stroke-width="1.5"/>
+        <rect x="712" y="235" width="16" height="20" rx="2" fill="var(--panel-2)" stroke="var(--line-strong)" stroke-width="1"/>
+        <text class="stext sm" x="742" y="248" text-anchor="start">pull-up interne</text>
+        <text class="stext sm" x="628" y="285" text-anchor="middle" style="fill:var(--od)">RESET ↔ 8</text>
+      </g>
+
+      <!-- GND rail -->
+      <line x1="99" y1="340" x2="99" y2="360" stroke="var(--gnd)" stroke-width="2.5"/>
+      <line x1="99" y1="360" x2="861" y2="360" stroke="var(--gnd)" stroke-width="2.5"/>
+      <line x1="861" y1="360" x2="861" y2="340" stroke="var(--gnd)" stroke-width="2.5"/>
+      <text class="stext sm" x="480" y="376" text-anchor="middle" style="fill:var(--gnd)">GND commun (Pi ↔ J33 pin 9/10) — à relier en premier</text>
+    </svg>
+  </div>
+
+  <h2><span class="n">05</span> Notes d'implémentation & sécurité</h2>
+  <div class="panel">
+    <ul class="notes">
+      <li><b>RESET en open-drain.</b> Le Pi tire la ligne à la masse pour asserter le reset (GPIO en sortie basse), puis la relâche en <b>haute impédance</b> (GPIO en entrée) — la pull-up de la carte la ramène à l'état haut. <b>Ne jamais</b> forcer RESET au niveau haut. Un petit MOSFET N (ou une sortie collecteur ouvert) est plus sûr qu'un drive direct.</li>
+      <li><b>Résistances série</b> 100–330 Ω sur chaque ligne : limitent le courant en cas de conflit de direction ou de mauvaise config GPIO. Un <b>buffer 74LVC244/125</b> (Pi 3,3 V ↔ cible 3,3 V) est fortement recommandé pour isoler le Pi de la cible — pas de translation de niveau nécessaire (même tension), c'est une protection.</li>
+      <li><b>+3V3S = détection, pas alimentation.</b> À lire par le logiciel avant de piloter quoi que ce soit : « la cible est-elle sous tension ? ». Le tenir en série ; ne jamais l'injecter sur le 3,3 V du Pi.</li>
+      <li><b>ALLPST</b> et <b>TCLK</b> sont optionnels pour un cycle backup/flash de base (protocole série 3 fils DSCLK/DSI/DSO + BKPT/RESET). ALLPST donne le statut « cœur halted » ; le rôle de TCLK en BDM pur reste <span class="tag lever">À LEVER</span>.</li>
+      <li><b>Timing.</b> Fréquence DSCLK ≤ PSTCLK/5 (RM §33.4.1). En bit-bang sur Linux non temps-réel, le respect du timing n'est pas garanti — envisager <code>pigpio</code>/DMA, la PIO, ou un co-processeur RP2040 en pont. Cette piste (bit-bang) <b>n'est pas validée sur matériel</b>.</li>
+    </ul>
+  </div>
+
+  <h2><span class="n">06</span> Points à lever & alternative</h2>
+  <div class="grid2">
+    <div class="panel">
+      <p style="margin-top:0"><span class="tag lever">À LEVER</span> avant le premier câblage</p>
+      <ul class="notes" style="margin-top:4px">
+        <li><b>Position physique de JC1</b> sur le PCB assemblé (repère sur <code>Assembly Drawings</code> ou inspection carte).</li>
+        <li><b>Rôle exact de TCLK</b> (broche 1) en mode BDM pur — legacy JTAG/pod P&amp;E, ou détection d'horloge cible ?</li>
+        <li><b>Faisabilité USBDM sur ARM64</b> si tu préfères l'alternative pod (voir ci-contre).</li>
+      </ul>
+    </div>
+    <div class="panel">
+      <p style="margin-top:0"><span class="tag">Alternative</span> Piste 1 — pod USBDM/P&amp;E</p>
+      <p style="margin:4px 0 0">Au lieu de câbler le GPIO, un <b>pod BDM</b> se branche en <b>USB</b> sur le Pi et sur J33
+      via son câble 10 broches — le pod gère le timing (plus fiable que le bit-bang). Aucun schéma GPIO,
+      mais le support <b>ARM64 / Raspberry Pi OS</b> des outils USBDM n'est <b>pas confirmé</b> : à valider
+      par un build avant de s'y engager.</p>
+    </div>
+  </div>
+
+  <footer>
+    Brochage J33 : lecture directe du schéma <code>SDEC944-xD_Coeur</code> (page 5). Directions & timing :
+    Reference Manual NXP <code>MCF52259RM</code> §33.2–33.4. Mapping GPIO : proposition modifiable.
+    Diagramme non validé sur matériel — vérifier JC1 et la tension 3,3 V avant tout branchement.
+  </footer>
+</div>
