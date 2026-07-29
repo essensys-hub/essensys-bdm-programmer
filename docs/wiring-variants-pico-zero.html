@@ -1,0 +1,335 @@
+<title>Variantes Pico & Pi Zero — programmeur BDM SC944D</title>
+<style>
+  :root{
+    --bg:#eceef1; --panel:#f7f8fa; --panel-2:#ffffff; --ink:#1a1f27; --ink-2:#525c69;
+    --line:#d3d8df; --line-strong:#b9c0c9; --copper:#b5722e;
+    --out:#0f7d92; --in:#7b4bc4; --od:#b26a00; --sense:#2f7d4f; --gnd:#5b6472; --nc:#9aa2ad;
+    --danger:#b3261e; --danger-bg:#fbe9e7; --good:#2f7d4f; --good-bg:#e9f4ee;
+    --mono:ui-monospace,"SF Mono","Cascadia Code",Menlo,Consolas,monospace;
+    --sans:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#12151a; --panel:#191d24; --panel-2:#1f242c; --ink:#e8ecf1; --ink-2:#9aa4b1;
+    --line:#2b313a; --line-strong:#3a424e; --copper:#d99a55;
+    --out:#3cc4dc; --in:#b28bff; --od:#e0a34a; --sense:#5fc98a; --gnd:#8b95a4; --nc:#5c6572;
+    --danger:#ff6b5e; --danger-bg:#2c1614; --good:#5fc98a; --good-bg:#14251b;
+  }}
+  :root[data-theme="light"]{
+    --bg:#eceef1; --panel:#f7f8fa; --panel-2:#ffffff; --ink:#1a1f27; --ink-2:#525c69;
+    --line:#d3d8df; --line-strong:#b9c0c9; --copper:#b5722e;
+    --out:#0f7d92; --in:#7b4bc4; --od:#b26a00; --sense:#2f7d4f; --gnd:#5b6472; --nc:#9aa2ad;
+    --danger:#b3261e; --danger-bg:#fbe9e7; --good:#2f7d4f; --good-bg:#e9f4ee;
+  }
+  :root[data-theme="dark"]{
+    --bg:#12151a; --panel:#191d24; --panel-2:#1f242c; --ink:#e8ecf1; --ink-2:#9aa4b1;
+    --line:#2b313a; --line-strong:#3a424e; --copper:#d99a55;
+    --out:#3cc4dc; --in:#b28bff; --od:#e0a34a; --sense:#5fc98a; --gnd:#8b95a4; --nc:#5c6572;
+    --danger:#ff6b5e; --danger-bg:#2c1614; --good:#5fc98a; --good-bg:#14251b;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);line-height:1.55;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1040px;margin:0 auto;padding:32px 22px 72px}
+  header.top{border-bottom:2px solid var(--copper);padding-bottom:18px;margin-bottom:8px}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--copper);margin:0 0 8px}
+  h1{font-size:clamp(24px,4vw,34px);line-height:1.12;margin:0 0 6px;text-wrap:balance;letter-spacing:-.01em}
+  .sub{color:var(--ink-2);margin:0;max-width:64ch}
+  h2{font-size:19px;letter-spacing:-.01em;margin:40px 0 14px;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+  h2 .n{font-family:var(--mono);font-size:13px;color:var(--copper);font-weight:600}
+  p{max-width:68ch}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px 20px}
+  .banner{display:flex;gap:14px;align-items:flex-start;border-radius:12px;padding:15px 18px;margin:18px 0}
+  .banner.warn{background:var(--danger-bg);border:1px solid var(--danger)}
+  .banner.ok{background:var(--good-bg);border:1px solid var(--good)}
+  .banner .mk{font-family:var(--mono);font-weight:700;font-size:13px;border-radius:6px;padding:2px 7px;white-space:nowrap;margin-top:2px}
+  .banner.warn .mk{color:var(--danger);border:1.5px solid var(--danger)}
+  .banner.ok .mk{color:var(--good);border:1.5px solid var(--good)}
+  .banner b{color:inherit} .banner ul{margin:6px 0 0;padding-left:18px} .banner li{margin:3px 0}
+  .chip{font-family:var(--mono);font-size:10.5px;font-weight:700;letter-spacing:.06em;padding:2px 6px;border-radius:5px;white-space:nowrap;border:1px solid transparent}
+  .c-out{color:var(--out);border-color:var(--out);background:color-mix(in srgb,var(--out) 12%,transparent)}
+  .c-in{color:var(--in);border-color:var(--in);background:color-mix(in srgb,var(--in) 12%,transparent)}
+  .c-od{color:var(--od);border-color:var(--od);background:color-mix(in srgb,var(--od) 12%,transparent)}
+  .c-sense{color:var(--sense);border-color:var(--sense);background:color-mix(in srgb,var(--sense) 12%,transparent)}
+  .c-gnd{color:var(--gnd);border-color:var(--gnd);background:color-mix(in srgb,var(--gnd) 14%,transparent)}
+  .c-nc{color:var(--nc);border-color:var(--nc)}
+  .twrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px}
+  table{border-collapse:collapse;width:100%;font-size:13.5px;min-width:660px}
+  th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+  thead th{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2);background:var(--panel)}
+  tbody tr:last-child td{border-bottom:none}
+  td.sig,td .m{font-family:var(--mono);font-weight:600}
+  .tabnum{font-variant-numeric:tabular-nums}
+  .verdict{font-family:var(--mono);font-size:11px;font-weight:700;padding:2px 7px;border-radius:5px;white-space:nowrap}
+  .v-best{color:#fff;background:var(--good)} .v-ok{color:var(--good);border:1px solid var(--good)} .v-warn{color:var(--od);border:1px solid var(--od)}
+  .schem{background:var(--panel-2);border:1px solid var(--line);border-radius:12px;padding:8px}
+  .schem svg{display:block;width:100%;height:auto}
+  .stext{font-family:var(--mono);font-size:12px;fill:var(--ink)} .stext.sm{font-size:10.5px;fill:var(--ink-2)}
+  .legend{display:flex;flex-wrap:wrap;gap:8px 14px;font-size:12.5px;color:var(--ink-2);padding:6px 12px 10px}
+  .legend span{display:inline-flex;align-items:center;gap:6px}
+  .dot{width:10px;height:10px;border-radius:3px;flex:none}
+  ul.notes{padding-left:18px;margin:8px 0 0} ul.notes li{margin:6px 0;max-width:72ch}
+  .tag{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--copper);border:1px solid var(--copper);border-radius:5px;padding:1px 6px}
+  .tag.lever{color:var(--danger);border-color:var(--danger)}
+  code{font-family:var(--mono);font-size:.9em;background:var(--panel-2);border:1px solid var(--line);padding:1px 5px;border-radius:4px}
+  footer{margin-top:44px;padding-top:16px;border-top:1px solid var(--line);color:var(--ink-2);font-size:12.5px}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <p class="eyebrow">Variantes hôte · programmeur BDM</p>
+    <h1>Raspberry Pi Pico &amp; Pi Zero → BDM SC944D</h1>
+    <p class="sub">Alternatives au Pi 4 pour piloter le port BDM du MCF52259. Le côté carte (connecteur J33,
+    signaux, directions) est <b>identique</b> au guide Pi 4 — seul l'hôte change. Les trois hôtes Raspberry
+    sont en <b>3,3 V</b> : aucun convertisseur de niveau nécessaire.</p>
+  </header>
+
+  <div class="banner ok">
+    <span class="mk">CLÉ</span>
+    <div>Le BDM est une liaison série synchrone : DSCLK cadence l'échantillonnage de DSI/DSO. Ce qui distingue
+    les hôtes, c'est le <b>timing</b>. Le <b>Pico (RP2040)</b> a des <b>PIO</b> (machines à états) → timing
+    <b>déterministe cycle-exact</b>. Le Pi 4 et le Pi Zero font du <b>bit-bang sous Linux</b> (non temps-réel) :
+    fonctionnel mais avec du jitter, d'autant plus sur le <b>Zero/W mono-cœur</b>.</div>
+  </div>
+
+  <h2><span class="n">01</span> Comparatif des hôtes Raspberry</h2>
+  <div class="twrap">
+    <table>
+      <thead><tr><th>Hôte</th><th>Logique</th><th>CPU</th><th>Timing BDM</th><th>Header GPIO</th><th>Verdict</th></tr></thead>
+      <tbody>
+        <tr><td class="m">Pi 4</td><td>3,3 V</td><td>quad A72</td><td>bit-bang Linux</td><td>40 pts soudé</td><td><span class="verdict v-ok">OK</span></td></tr>
+        <tr><td class="m">Pico <span style="font-weight:400;color:var(--ink-2)">RP2040</span></td><td>3,3 V</td><td>dual M0+ (PIO)</td><td><b>PIO — cycle-exact</b></td><td>40 pts (à souder)</td><td><span class="verdict v-best">RECOMMANDÉ</span></td></tr>
+        <tr><td class="m">Pi Zero 2 W</td><td>3,3 V</td><td>quad A53</td><td>bit-bang Linux</td><td>40 pts (souvent à souder)</td><td><span class="verdict v-ok">OK</span></td></tr>
+        <tr><td class="m">Pi Zero / Zero W</td><td>3,3 V</td><td><b>mono</b> ARM11</td><td>bit-bang — <b>jitter accru</b></td><td>40 pts (WH = pré-soudé)</td><td><span class="verdict v-warn">VIABLE</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p style="margin-top:12px;color:var(--ink-2);font-size:14px"><b>Pinout identique.</b> Pi 4, Pi Zero et Zero 2 W
+  partagent le <b>même header 40 broches</b> et les <b>mêmes numéros BCM</b> — le mapping et le schéma du guide
+  Pi 4 s'appliquent tels quels au Pi Zero.</p>
+
+  <h2><span class="n">02</span> Variante Raspberry Pi Pico <span class="verdict v-best" style="align-self:center">recommandé</span></h2>
+  <p>Mapping sur des GP <b>consécutifs</b> (GP2–GP8) pour qu'un unique programme PIO gère DSCLK/DSI/DSO.
+  Le Pico se comporte en <b>pod USB</b> : l'hôte lui parle en série, le Pico fait le BDM.</p>
+  <div class="twrap" style="margin-bottom:16px">
+    <table>
+      <thead><tr><th>J33</th><th>Signal</th><th>Direction</th><th>Pico (GP / phys)</th><th>Note</th></tr></thead>
+      <tbody>
+        <tr><td class="m tabnum">6</td><td class="sig">DSCLK</td><td><span class="chip c-out">Pico → cible</span></td><td class="m">GP2 / <span class="tabnum">4</span></td><td>sortie horloge PIO</td></tr>
+        <tr><td class="m tabnum">4</td><td class="sig">DSI</td><td><span class="chip c-out">Pico → cible</span></td><td class="m">GP3 / <span class="tabnum">5</span></td><td>PIO out</td></tr>
+        <tr><td class="m tabnum">3</td><td class="sig">DSO</td><td><span class="chip c-in">cible → Pico</span></td><td class="m">GP4 / <span class="tabnum">6</span></td><td>PIO in</td></tr>
+        <tr><td class="m tabnum">2</td><td class="sig">BKPT</td><td><span class="chip c-out">Pico → cible</span></td><td class="m">GP5 / <span class="tabnum">7</span></td><td>GPIO</td></tr>
+        <tr><td class="m tabnum">8</td><td class="sig">RESET</td><td><span class="chip c-od">open-drain</span></td><td class="m">GP6 / <span class="tabnum">9</span></td><td>drive OD (Hi-Z = relâché)</td></tr>
+        <tr><td class="m tabnum">5</td><td class="sig">ALLPST</td><td><span class="chip c-in">cible → Pico</span></td><td class="m">GP7 / <span class="tabnum">10</span></td><td>optionnel</td></tr>
+        <tr><td class="m tabnum">7</td><td class="sig">+3V3S</td><td><span class="chip c-sense">sense</span></td><td class="m">GP8 / <span class="tabnum">11</span></td><td>ou <b>GP26/ADC0</b> (phys 31) = mesure analogique</td></tr>
+        <tr><td class="m tabnum">9·10</td><td class="sig">GND</td><td><span class="chip c-gnd">masse</span></td><td class="m">GND / <span class="tabnum">3·8·…</span></td><td>relier en premier</td></tr>
+        <tr><td class="m tabnum">1</td><td class="sig">TCLK</td><td><span class="chip c-nc">NC</span></td><td class="m">—</td><td><span class="tag lever">À LEVER</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="schem">
+    <svg viewBox="0 0 900 580" role="img" aria-label="Raspberry Pi Pico relié au connecteur J33 par des fils de couleur">
+      <rect x="70" y="150" width="180" height="290" rx="12" fill="#26333f" stroke="#3a4a58" stroke-width="2"/>
+      <text class="stext" x="160" y="174" text-anchor="middle" style="fill:#cdd7e0;font-weight:700">SC944D · J33</text>
+      <rect x="112" y="188" width="96" height="234" rx="6" fill="#15181c" stroke="#0a0c0e"/>
+      <g>
+        <circle cx="132" cy="212" r="6" fill="#3a3f45"/><circle cx="188" cy="212" r="6" fill="var(--out)"/>
+        <circle cx="132" cy="256" r="6" fill="var(--in)"/><circle cx="188" cy="256" r="6" fill="var(--out)"/>
+        <circle cx="132" cy="300" r="6" fill="var(--in)"/><circle cx="188" cy="300" r="6" fill="var(--out)"/>
+        <circle cx="132" cy="344" r="6" fill="var(--sense)"/><circle cx="188" cy="344" r="6" fill="var(--od)"/>
+        <circle cx="132" cy="388" r="6" fill="var(--gnd)"/><circle cx="188" cy="388" r="6" fill="var(--gnd)"/>
+      </g>
+      <g class="stext sm" style="fill:#9aa7b3">
+        <text x="120" y="206" text-anchor="end">1</text><text x="200" y="206" text-anchor="start">2</text>
+        <text x="120" y="250" text-anchor="end">3</text><text x="200" y="250" text-anchor="start">4</text>
+        <text x="120" y="294" text-anchor="end">5</text><text x="200" y="294" text-anchor="start">6</text>
+        <text x="120" y="338" text-anchor="end">7</text><text x="200" y="338" text-anchor="start">8</text>
+        <text x="120" y="382" text-anchor="end">9</text><text x="200" y="382" text-anchor="start">10</text>
+      </g>
+      <text class="stext sm" x="160" y="414" text-anchor="middle" style="fill:var(--danger)">⚠ JC1 = BDM</text>
+
+      <rect x="560" y="70" width="150" height="440" rx="14" fill="#1f7a44" stroke="#12522c" stroke-width="2"/>
+      <rect x="612" y="60" width="46" height="26" rx="4" fill="#c9ccce" stroke="#8a9095"/>
+      <text class="stext sm" x="635" y="104" text-anchor="middle" style="fill:#dff3e6">USB</text>
+      <rect x="600" y="250" width="70" height="70" rx="6" fill="#111" stroke="#000"/>
+      <text class="stext sm" x="635" y="290" text-anchor="middle" style="fill:#9aa">RP2040</text>
+      <rect x="623" y="470" width="24" height="16" rx="3" fill="#f2f2f2" stroke="#999"/>
+      <text class="stext sm" x="635" y="500" text-anchor="middle" style="fill:#dff3e6">BOOTSEL</text>
+      <text class="stext sm" x="635" y="352" text-anchor="middle" style="fill:#dff3e6;font-weight:700">Pico</text>
+
+      <g fill="#e8c760" stroke="#b8952f" stroke-width="0.5">
+        <circle cx="560" cy="120" r="4.5"/><circle cx="560" cy="141" r="4.5"/><circle cx="560" cy="162" r="4.5"/><circle cx="560" cy="183" r="4.5"/><circle cx="560" cy="204" r="4.5"/><circle cx="560" cy="225" r="4.5"/><circle cx="560" cy="246" r="4.5"/><circle cx="560" cy="267" r="4.5"/><circle cx="560" cy="288" r="4.5"/><circle cx="560" cy="309" r="4.5"/><circle cx="560" cy="330" r="4.5"/><circle cx="560" cy="351" r="4.5"/><circle cx="560" cy="372" r="4.5"/><circle cx="560" cy="393" r="4.5"/><circle cx="560" cy="414" r="4.5"/><circle cx="560" cy="435" r="4.5"/><circle cx="560" cy="456" r="4.5"/><circle cx="560" cy="477" r="4.5"/><circle cx="560" cy="498" r="4.5"/><circle cx="560" cy="519" r="4.5"/>
+      </g>
+      <g fill="#e8c760" stroke="#b8952f" stroke-width="0.5">
+        <circle cx="710" cy="120" r="4.5"/><circle cx="710" cy="141" r="4.5"/><circle cx="710" cy="162" r="4.5"/><circle cx="710" cy="183" r="4.5"/><circle cx="710" cy="204" r="4.5"/><circle cx="710" cy="225" r="4.5"/><circle cx="710" cy="246" r="4.5"/><circle cx="710" cy="267" r="4.5"/><circle cx="710" cy="288" r="4.5"/><circle cx="710" cy="309" r="4.5"/><circle cx="710" cy="330" r="4.5"/><circle cx="710" cy="351" r="4.5"/><circle cx="710" cy="372" r="4.5"/><circle cx="710" cy="393" r="4.5"/><circle cx="710" cy="414" r="4.5"/><circle cx="710" cy="435" r="4.5"/><circle cx="710" cy="456" r="4.5"/><circle cx="710" cy="477" r="4.5"/><circle cx="710" cy="498" r="4.5"/><circle cx="710" cy="519" r="4.5"/>
+      </g>
+
+      <g fill="none" stroke-width="4.5" stroke-linecap="round">
+        <path d="M132 388 C300 388, 400 162, 560 162" stroke="var(--gnd)"/>
+        <path d="M188 300 C340 300, 400 183, 560 183" stroke="var(--out)"/>
+        <path d="M188 256 C360 256, 400 204, 560 204" stroke="var(--out)"/>
+        <path d="M132 256 C360 256, 400 225, 560 225" stroke="var(--in)"/>
+        <path d="M188 212 C380 212, 400 246, 560 246" stroke="var(--out)"/>
+        <path d="M188 344 C360 344, 400 288, 560 288" stroke="var(--od)"/>
+        <path d="M132 300 C360 300, 400 309, 560 309" stroke="var(--in)"/>
+        <path d="M132 344 C360 344, 400 330, 560 330" stroke="var(--sense)"/>
+      </g>
+      <g stroke="#fff" stroke-width="1.5">
+        <circle cx="560" cy="162" r="6.5" fill="var(--gnd)"/>
+        <circle cx="560" cy="183" r="6.5" fill="var(--out)"/>
+        <circle cx="560" cy="204" r="6.5" fill="var(--out)"/>
+        <circle cx="560" cy="225" r="6.5" fill="var(--in)"/>
+        <circle cx="560" cy="246" r="6.5" fill="var(--out)"/>
+        <circle cx="560" cy="288" r="6.5" fill="var(--od)"/>
+        <circle cx="560" cy="309" r="6.5" fill="var(--in)"/>
+        <circle cx="560" cy="330" r="6.5" fill="var(--sense)"/>
+      </g>
+      <g class="stext sm" style="fill:var(--ink-2)">
+        <text x="530" y="166" text-anchor="end">GND</text>
+        <text x="724" y="187">GP2 · DSCLK</text>
+        <text x="724" y="208">GP3 · DSI</text>
+        <text x="724" y="229">GP4 · DSO</text>
+        <text x="724" y="250">GP5 · BKPT</text>
+        <text x="724" y="292">GP6 · RESET</text>
+        <text x="724" y="313">GP7 · ALLPST</text>
+        <text x="724" y="334">GP8 · +3V3S</text>
+      </g>
+    </svg>
+    <div class="legend">
+      <span><i class="dot" style="background:var(--out)"></i>OUT — Pico → cible</span>
+      <span><i class="dot" style="background:var(--in)"></i>IN — cible → Pico</span>
+      <span><i class="dot" style="background:var(--od)"></i>RESET (open-drain)</span>
+      <span><i class="dot" style="background:var(--sense)"></i>+3V3S (sense)</span>
+      <span><i class="dot" style="background:var(--gnd)"></i>GND</span>
+    </div>
+  </div>
+
+  <h2><span class="n">03</span> Variante Raspberry Pi Zero</h2>
+  <div class="banner ok">
+    <span class="mk">=</span>
+    <div><b>Câblage identique au Pi 4.</b> Le Pi Zero a le <b>même header 40 broches</b>, les <b>mêmes numéros BCM</b>
+    et la <b>même logique 3,3 V</b> — la table de câblage ci-dessous est celle du guide Pi 4, à l'identique.
+    Aucun convertisseur de niveau.</div>
+  </div>
+  <div class="twrap" style="margin-bottom:16px">
+    <table>
+      <thead><tr><th>J33</th><th>Signal</th><th>Direction</th><th>Pi Zero (BCM / phys)</th></tr></thead>
+      <tbody>
+        <tr><td class="m tabnum">6</td><td class="sig">DSCLK</td><td><span class="chip c-out">Pi → cible</span></td><td class="m">GPIO11 / <span class="tabnum">23</span></td></tr>
+        <tr><td class="m tabnum">4</td><td class="sig">DSI</td><td><span class="chip c-out">Pi → cible</span></td><td class="m">GPIO10 / <span class="tabnum">19</span></td></tr>
+        <tr><td class="m tabnum">3</td><td class="sig">DSO</td><td><span class="chip c-in">cible → Pi</span></td><td class="m">GPIO9 / <span class="tabnum">21</span></td></tr>
+        <tr><td class="m tabnum">2</td><td class="sig">BKPT</td><td><span class="chip c-out">Pi → cible</span></td><td class="m">GPIO25 / <span class="tabnum">22</span></td></tr>
+        <tr><td class="m tabnum">8</td><td class="sig">RESET</td><td><span class="chip c-od">open-drain</span></td><td class="m">GPIO24 / <span class="tabnum">18</span></td></tr>
+        <tr><td class="m tabnum">5</td><td class="sig">ALLPST</td><td><span class="chip c-in">cible → Pi</span></td><td class="m">GPIO23 / <span class="tabnum">16</span></td></tr>
+        <tr><td class="m tabnum">7</td><td class="sig">+3V3S</td><td><span class="chip c-sense">sense</span></td><td class="m">GPIO8 / <span class="tabnum">24</span></td></tr>
+        <tr><td class="m tabnum">9·10</td><td class="sig">GND</td><td><span class="chip c-gnd">masse</span></td><td class="m">GND / <span class="tabnum">6·9·…</span></td></tr>
+        <tr><td class="m tabnum">1</td><td class="sig">TCLK</td><td><span class="chip c-nc">NC</span></td><td class="m">— <span class="tag lever" style="margin-left:4px">À LEVER</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="schem">
+    <svg viewBox="0 0 900 470" role="img" aria-label="Raspberry Pi Zero relié au connecteur J33 par des fils de couleur">
+      <!-- Pi Zero board (small, header along top edge) -->
+      <rect x="60" y="150" width="470" height="230" rx="12" fill="#166b33" stroke="#0e4a22" stroke-width="2"/>
+      <text class="stext" x="295" y="320" text-anchor="middle" style="fill:#dff3e6;font-weight:700">Raspberry Pi Zero 2 W</text>
+      <rect x="250" y="238" width="70" height="70" rx="6" fill="#111" stroke="#000"/>
+      <text class="stext sm" x="285" y="278" text-anchor="middle" style="fill:#9aa">RP3A0</text>
+      <!-- edge ports (mini-HDMI + micro-USB on bottom edge) -->
+      <rect x="150" y="372" width="30" height="14" rx="2" fill="#20242a" stroke="#000"/>
+      <rect x="200" y="372" width="24" height="14" rx="2" fill="#20242a" stroke="#000"/>
+      <rect x="244" y="372" width="24" height="14" rx="2" fill="#20242a" stroke="#000"/>
+      <text class="stext sm" x="207" y="368" text-anchor="middle" style="fill:#bfe3cc">HDMI · USB · PWR</text>
+      <rect x="52" y="180" width="14" height="46" rx="2" fill="#20242a" stroke="#000"/><!-- microSD -->
+
+      <!-- 40-pin header along top edge -->
+      <rect x="96" y="168" width="418" height="42" rx="4" fill="#141414" stroke="#000"/>
+      <text class="stext sm" x="110" y="228" text-anchor="start" style="fill:#bfe3cc">Header GPIO 40 — broche 1 ⟵ (souvent à souder ; Zero WH = pré-soudé)</text>
+      <!-- pins: odd row y=180, even row y=200, x=110 + i*20.6 -->
+      <g fill="#e8c760" stroke="#b8952f" stroke-width="0.5">
+        <circle cx="110" cy="180" r="4"/><circle cx="131" cy="180" r="4"/><circle cx="151" cy="180" r="4"/><circle cx="172" cy="180" r="4"/><circle cx="192" cy="180" r="4"/><circle cx="213" cy="180" r="4"/><circle cx="233" cy="180" r="4"/><circle cx="254" cy="180" r="4"/><circle cx="274" cy="180" r="4"/><circle cx="295" cy="180" r="4"/><circle cx="315" cy="180" r="4"/><circle cx="336" cy="180" r="4"/><circle cx="356" cy="180" r="4"/><circle cx="377" cy="180" r="4"/><circle cx="397" cy="180" r="4"/><circle cx="418" cy="180" r="4"/><circle cx="438" cy="180" r="4"/><circle cx="459" cy="180" r="4"/><circle cx="479" cy="180" r="4"/><circle cx="500" cy="180" r="4"/>
+        <circle cx="110" cy="200" r="4"/><circle cx="131" cy="200" r="4"/><circle cx="151" cy="200" r="4"/><circle cx="172" cy="200" r="4"/><circle cx="192" cy="200" r="4"/><circle cx="213" cy="200" r="4"/><circle cx="233" cy="200" r="4"/><circle cx="254" cy="200" r="4"/><circle cx="274" cy="200" r="4"/><circle cx="295" cy="200" r="4"/><circle cx="315" cy="200" r="4"/><circle cx="336" cy="200" r="4"/><circle cx="356" cy="200" r="4"/><circle cx="377" cy="200" r="4"/><circle cx="397" cy="200" r="4"/><circle cx="418" cy="200" r="4"/><circle cx="438" cy="200" r="4"/><circle cx="459" cy="200" r="4"/><circle cx="479" cy="200" r="4"/><circle cx="500" cy="200" r="4"/>
+      </g>
+
+      <!-- J33 top-right -->
+      <rect x="660" y="40" width="180" height="240" rx="12" fill="#26333f" stroke="#3a4a58" stroke-width="2"/>
+      <text class="stext" x="750" y="63" text-anchor="middle" style="fill:#cdd7e0;font-weight:700">J33</text>
+      <rect x="702" y="74" width="96" height="190" rx="6" fill="#15181c" stroke="#0a0c0e"/>
+      <g>
+        <circle cx="722" cy="96" r="6" fill="#3a3f45"/><circle cx="778" cy="96" r="6" fill="var(--out)"/>
+        <circle cx="722" cy="132" r="6" fill="var(--in)"/><circle cx="778" cy="132" r="6" fill="var(--out)"/>
+        <circle cx="722" cy="168" r="6" fill="var(--in)"/><circle cx="778" cy="168" r="6" fill="var(--out)"/>
+        <circle cx="722" cy="204" r="6" fill="var(--sense)"/><circle cx="778" cy="204" r="6" fill="var(--od)"/>
+        <circle cx="722" cy="240" r="6" fill="var(--gnd)"/><circle cx="778" cy="240" r="6" fill="var(--gnd)"/>
+      </g>
+      <g class="stext sm" style="fill:#9aa7b3">
+        <text x="710" y="100" text-anchor="end">1</text><text x="790" y="100">2</text>
+        <text x="710" y="136" text-anchor="end">3</text><text x="790" y="136">4</text>
+        <text x="710" y="172" text-anchor="end">5</text><text x="790" y="172">6</text>
+        <text x="710" y="208" text-anchor="end">7</text><text x="790" y="208">8</text>
+        <text x="710" y="244" text-anchor="end">9</text><text x="790" y="244">10</text>
+      </g>
+
+      <!-- wires from Pi Zero used pins (top edge) to J33 -->
+      <g fill="none" stroke-width="4" stroke-linecap="round">
+        <!-- GND phys6 even i=2 x=151 y200 -> J33-9(722,240) -->
+        <path d="M151 200 C151 120, 600 300, 722 240" stroke="var(--gnd)"/>
+        <!-- ALLPST GPIO23 phys16 even i=7 x=254 y200 -> J33-5(722,168) -->
+        <path d="M254 200 C254 110, 600 220, 722 168" stroke="var(--in)"/>
+        <!-- RESET GPIO24 phys18 even i=8 x=274 y200 -> J33-8(778,204) -->
+        <path d="M274 200 C274 120, 640 260, 778 204" stroke="var(--od)"/>
+        <!-- DSI GPIO10 phys19 odd i=9 x=295 y180 -> J33-4(778,132) -->
+        <path d="M295 180 C295 90, 640 180, 778 132" stroke="var(--out)"/>
+        <!-- DSO GPIO9 phys21 odd i=10 x=315 y180 -> J33-3(722,132) -->
+        <path d="M315 180 C315 80, 600 190, 722 132" stroke="var(--in)"/>
+        <!-- BKPT GPIO25 phys22 even i=10 x=315 y200 -> J33-2(778,96) -->
+        <path d="M315 200 C360 120, 640 130, 778 96" stroke="var(--out)"/>
+        <!-- DSCLK GPIO11 phys23 odd i=11 x=336 y180 -> J33-6(778,168) -->
+        <path d="M336 180 C336 100, 640 220, 778 168" stroke="var(--out)"/>
+        <!-- +3V3S GPIO8 phys24 even i=11 x=336 y200 -> J33-7(722,204) -->
+        <path d="M336 200 C420 150, 620 230, 722 204" stroke="var(--sense)"/>
+      </g>
+      <g stroke="#fff" stroke-width="1.3">
+        <circle cx="151" cy="200" r="6" fill="var(--gnd)"/>
+        <circle cx="254" cy="200" r="6" fill="var(--in)"/>
+        <circle cx="274" cy="200" r="6" fill="var(--od)"/>
+        <circle cx="295" cy="180" r="6" fill="var(--out)"/>
+        <circle cx="315" cy="180" r="6" fill="var(--in)"/>
+        <circle cx="315" cy="200" r="6" fill="var(--out)"/>
+        <circle cx="336" cy="180" r="6" fill="var(--out)"/>
+        <circle cx="336" cy="200" r="6" fill="var(--sense)"/>
+      </g>
+      <g class="stext sm" text-anchor="middle" style="fill:var(--ink-2)">
+        <text x="151" y="230">6</text><text x="254" y="174">16</text><text x="274" y="230">18</text>
+        <text x="295" y="174">19</text><text x="315" y="230">21·22</text><text x="336" y="174">23</text><text x="352" y="230">24</text>
+      </g>
+    </svg>
+    <div class="legend">
+      <span><i class="dot" style="background:var(--out)"></i>OUT — Pi → cible</span>
+      <span><i class="dot" style="background:var(--in)"></i>IN — cible → Pi</span>
+      <span><i class="dot" style="background:var(--od)"></i>RESET (open-drain)</span>
+      <span><i class="dot" style="background:var(--sense)"></i>+3V3S (sense)</span>
+      <span><i class="dot" style="background:var(--gnd)"></i>GND</span>
+    </div>
+  </div>
+
+  <h2><span class="n">04</span> Recommandation</h2>
+  <div class="panel">
+    <ul class="notes" style="margin-top:0">
+      <li><b>Pico (RP2040)</b> — le meilleur choix : le <b>PIO</b> donne le timing BDM déterministe que le
+      bit-bang Linux (Pi 4 / Zero) ne garantit pas. 3,3 V, câblage direct.</li>
+      <li><b>Pi Zero</b> — parfaitement viable, câblage <b>identique au Pi 4</b> (même pinout, même 3,3 V).
+      Prends de préférence un <b>Zero 2 W</b> (quad-cœur, moins de jitter) ; sur un <b>Zero/W mono-cœur</b>
+      le bit-bang aura plus de gigue (le BDM fonctionne jusqu'à DC, donc ça marche, juste plus lent/moins régulier).
+      Header 40 pts <b>à souder</b> sauf modèle <b>WH</b>.</li>
+      <li>Inchangé quel que soit l'hôte : <b>JC1 en mode BDM</b> <span class="tag lever">À LEVER</span>,
+      masse commune en premier, RESET en open-drain, +3V3S en détection seule, résistances série 100–330 Ω
+      (buffer 74LVC recommandé). Voir le guide Pi 4 pour le schéma électrique détaillé.</li>
+    </ul>
+  </div>
+
+  <footer>
+    Brochage J33 &amp; directions : schéma <code>SDEC944-xD_Coeur</code> + RM NXP <code>MCF52259RM</code> §33.
+    Pinout Raspberry identique sur Pi 4 / Zero / Zero 2 W. Mappings GP/BCM : propositions modifiables.
+    Diagrammes non validés sur matériel — vérifier JC1 et la tension 3,3 V avant branchement.
+  </footer>
+</div>
