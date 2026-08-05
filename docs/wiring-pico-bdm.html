@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Guide Pico → BDM SC944D — câblage, Mac, firmware</title>
+<style>
+  :root{
+    --bg:#eceef1; --panel:#f7f8fa; --panel-2:#ffffff; --ink:#1a1f27; --ink-2:#525c69;
+    --line:#d3d8df; --line-strong:#b9c0c9; --copper:#b5722e;
+    --out:#0f7d92; --in:#7b4bc4; --od:#b26a00; --sense:#2f7d4f; --gnd:#5b6472; --nc:#9aa2ad;
+    --usb:#1565c0; --uart:#6a1b9a;
+    --danger:#b3261e; --danger-bg:#fbe9e7; --good:#2f7d4f; --good-bg:#e9f4ee;
+    --mono:ui-monospace,"SF Mono","Cascadia Code",Menlo,Consolas,monospace;
+    --sans:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#12151a; --panel:#191d24; --panel-2:#1f242c; --ink:#e8ecf1; --ink-2:#9aa4b1;
+    --line:#2b313a; --line-strong:#3a424e; --copper:#d99a55;
+    --out:#3cc4dc; --in:#b28bff; --od:#e0a34a; --sense:#5fc98a; --gnd:#8b95a4; --nc:#5c6572;
+    --usb:#64b5f6; --uart:#ce93d8;
+    --danger:#ff6b5e; --danger-bg:#2c1614; --good:#5fc98a; --good-bg:#14251b;
+  }}
+  :root[data-theme="light"]{
+    --bg:#eceef1; --panel:#f7f8fa; --panel-2:#ffffff; --ink:#1a1f27; --ink-2:#525c69;
+    --line:#d3d8df; --line-strong:#b9c0c9; --copper:#b5722e;
+    --out:#0f7d92; --in:#7b4bc4; --od:#b26a00; --sense:#2f7d4f; --gnd:#5b6472; --nc:#9aa2ad;
+    --usb:#1565c0; --uart:#6a1b9a;
+    --danger:#b3261e; --danger-bg:#fbe9e7; --good:#2f7d4f; --good-bg:#e9f4ee;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);line-height:1.55;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1040px;margin:0 auto;padding:32px 22px 72px}
+  header.top{border-bottom:2px solid var(--copper);padding-bottom:18px;margin-bottom:8px}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--copper);margin:0 0 8px}
+  h1{font-size:clamp(24px,4vw,34px);line-height:1.12;margin:0 0 6px;text-wrap:balance;letter-spacing:-.01em}
+  .sub{color:var(--ink-2);margin:0;max-width:70ch}
+  h2{font-size:19px;letter-spacing:-.01em;margin:40px 0 14px;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+  h2 .n{font-family:var(--mono);font-size:13px;color:var(--copper);font-weight:600}
+  h3{font-size:15px;margin:22px 0 10px}
+  p{max-width:72ch}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px 20px}
+  .banner{display:flex;gap:14px;align-items:flex-start;border-radius:12px;padding:15px 18px;margin:18px 0}
+  .banner.warn{background:var(--danger-bg);border:1px solid var(--danger)}
+  .banner.ok{background:var(--good-bg);border:1px solid var(--good)}
+  .banner .mk{font-family:var(--mono);font-weight:700;font-size:13px;border-radius:6px;padding:2px 7px;white-space:nowrap;margin-top:2px}
+  .banner.warn .mk{color:var(--danger);border:1.5px solid var(--danger)}
+  .banner.ok .mk{color:var(--good);border:1.5px solid var(--good)}
+  .banner ul{margin:6px 0 0;padding-left:18px} .banner li{margin:3px 0}
+  .chip{font-family:var(--mono);font-size:10.5px;font-weight:700;letter-spacing:.06em;padding:2px 6px;border-radius:5px;white-space:nowrap;border:1px solid transparent}
+  .c-out{color:var(--out);border-color:var(--out);background:color-mix(in srgb,var(--out) 12%,transparent)}
+  .c-in{color:var(--in);border-color:var(--in);background:color-mix(in srgb,var(--in) 12%,transparent)}
+  .c-od{color:var(--od);border-color:var(--od);background:color-mix(in srgb,var(--od) 12%,transparent)}
+  .c-sense{color:var(--sense);border-color:var(--sense);background:color-mix(in srgb,var(--sense) 12%,transparent)}
+  .c-gnd{color:var(--gnd);border-color:var(--gnd);background:color-mix(in srgb,var(--gnd) 14%,transparent)}
+  .c-nc{color:var(--nc);border-color:var(--nc)}
+  .c-usb{color:var(--usb);border-color:var(--usb);background:color-mix(in srgb,var(--usb) 12%,transparent)}
+  .c-uart{color:var(--uart);border-color:var(--uart);background:color-mix(in srgb,var(--uart) 12%,transparent)}
+  .twrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px}
+  table{border-collapse:collapse;width:100%;font-size:13.5px;min-width:640px}
+  th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+  thead th{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2);background:var(--panel)}
+  tbody tr:last-child td{border-bottom:none}
+  td.sig,.m{font-family:var(--mono);font-weight:600}
+  .tabnum{font-variant-numeric:tabular-nums}
+  .schem{background:var(--panel-2);border:1px solid var(--line);border-radius:12px;padding:8px;margin:14px 0}
+  .schem svg{display:block;width:100%;height:auto}
+  .schem .cap{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);padding:8px 12px 0}
+  .stext{font-family:var(--mono);font-size:12px;fill:var(--ink)} .stext.sm{font-size:10.5px;fill:var(--ink-2)}
+  .legend{display:flex;flex-wrap:wrap;gap:8px 14px;font-size:12.5px;color:var(--ink-2);padding:6px 12px 10px}
+  .legend span{display:inline-flex;align-items:center;gap:6px}
+  .dot{width:10px;height:10px;border-radius:3px;flex:none}
+  ul.notes{padding-left:18px;margin:8px 0 0} ul.notes li{margin:6px 0;max-width:74ch}
+  ol.steps{padding-left:22px;margin:8px 0} ol.steps li{margin:8px 0;max-width:74ch}
+  .tag{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--copper);border:1px solid var(--copper);border-radius:5px;padding:1px 6px}
+  .tag.lever{color:var(--danger);border-color:var(--danger)}
+  .tag.primary{color:var(--usb);border-color:var(--usb)}
+  .tag.opt{color:var(--uart);border-color:var(--uart)}
+  code{font-family:var(--mono);font-size:.9em;background:var(--panel-2);border:1px solid var(--line);padding:1px 5px;border-radius:4px}
+  pre{font-family:var(--mono);font-size:12.5px;background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:14px 16px;overflow-x:auto;line-height:1.45}
+  .flow{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin:14px 0}
+  .flow .box{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px;font-size:13px}
+  .flow .box b{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--copper);margin-bottom:4px}
+  footer{margin-top:44px;padding-top:16px;border-top:1px solid var(--line);color:var(--ink-2);font-size:12.5px}
+  @media print{
+    body{background:#fff!important;color:#1a1f27!important}
+    .wrap{max-width:none;padding:8mm}
+    .schem,.panel,.banner,.twrap{break-inside:avoid}
+    h2{break-after:avoid}
+  }
+  @page{size:A4;margin:12mm}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <p class="eyebrow">Guide dédié · Raspberry Pi Pico (RP2040)</p>
+    <h1>Pico → BDM SC944D : câblage, Mac, flash firmware</h1>
+    <p class="sub">Procédure complète : lever l’ambiguïté TCLK, brancher le Pico sur J33 (schémas type Fritzing),
+    flasher le firmware Pico, parler au Mac en <b>USB CDC</b> (chemin principal) ou UART (debug optionnel),
+    puis exporter / uploader le firmware cible via le pipeline BDM.</p>
+  </header>
+
+  <div class="flow">
+    <div class="box"><b>01</b> Lever TCLK (NC)</div>
+    <div class="box"><b>02</b> Câbler Pico ↔ J33</div>
+    <div class="box"><b>03</b> Flasher le Pico (UF2)</div>
+    <div class="box"><b>04</b> Mac ↔ Pico (USB / UART)</div>
+    <div class="box"><b>05</b> Backup / program / verify</div>
+  </div>
+
+  <!-- ========== 0 ========== -->
+  <h2><span class="n">00</span> Prérequis &amp; sécurité</h2>
+  <div class="banner warn">
+    <span class="mk">STOP</span>
+    <div>
+      <b>Avant tout fil :</b>
+      <ul>
+        <li>Carte SC944D alimentée en <b>3,3 V</b> (logique Pico = 3,3 V — pas de 5 V sur les GPIO).</li>
+        <li>Jumper <b>JC1 monté</b> → mode <b>BDM</b> (sinon J33 est en JTAG). <span class="tag lever">À VÉRIFIER</span></li>
+        <li>Relier <b>GND en premier</b>, retirer GND en dernier.</li>
+        <li>Ne jamais injecter de courant dans <b>+3V3S</b> (broche 7) — sense uniquement.</li>
+        <li>Résistances série 100–330 Ω recommandées sur DSCLK/DSI/DSO ; buffer 74LVC idéal.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="panel">
+    <ul class="notes" style="margin-top:0">
+      <li><b>Matériel :</b> Pico (ou Pico W), câble USB-A/C → micro-USB, fils Dupont, connecteur 2×5 vers J33.</li>
+      <li><b>Mac :</b> macOS avec accès série (<code>/dev/cu.usbmodem*</code> pour CDC).</li>
+      <li><b>Schémas :</b> vues type Fritzing (breadboard SVG). Recréables dans Fritzing depuis les tables de broches.</li>
+    </ul>
+  </div>
+
+  <!-- ========== 1 ========== -->
+  <h2><span class="n">01</span> Lever l’ambiguïté — J33 broche 1 <code>TCLK</code></h2>
+  <div class="banner ok">
+    <span class="mk">DÉCISION</span>
+    <div><b>Broche 1 TCLK = NC (non connectée).</b> Ne pas la brancher au Pico.
+    Le protocole BDM série 3 fils (<code>DSCLK</code> / <code>DSI</code> / <code>DSO</code>) n’utilise pas TCLK ;
+    l’horloge du protocole est <b>DSCLK générée par le Pico</b> (maître), cadencée côté MCU sur PSTCLK.</div>
+  </div>
+  <p>Pourquoi l’ambiguïté ? Sur le schéma SC944D, J33 pin 1 est câblé en <code>UC_TCLK</code> pour
+  compatibilité <b>JTAG / pods legacy</b>. En mode BDM (JC1 monté), ce signal n’entre pas dans le
+  transfert série 17 bits. Le laisser flottant côté pod évite toute injection parasite.</p>
+
+  <div class="schem">
+    <div class="cap">Fritzing · étape 1 — J33 pin 1 volontairement non câblé</div>
+    <svg viewBox="0 0 900 320" role="img" aria-label="J33 avec pin 1 TCLK marqué NC">
+      <rect x="300" y="40" width="300" height="240" rx="14" fill="#26333f" stroke="#3a4a58" stroke-width="2"/>
+      <text class="stext" x="450" y="68" text-anchor="middle" style="fill:#cdd7e0;font-weight:700">SC944D · J33</text>
+      <rect x="372" y="86" width="156" height="170" rx="6" fill="#15181c" stroke="#0a0c0e"/>
+      <!-- pins -->
+      <g>
+        <circle cx="408" cy="110" r="8" fill="none" stroke="var(--nc)" stroke-width="2.5" stroke-dasharray="3 2"/>
+        <circle cx="492" cy="110" r="8" fill="var(--out)"/>
+        <circle cx="408" cy="145" r="8" fill="var(--in)"/><circle cx="492" cy="145" r="8" fill="var(--out)"/>
+        <circle cx="408" cy="180" r="8" fill="var(--in)"/><circle cx="492" cy="180" r="8" fill="var(--out)"/>
+        <circle cx="408" cy="215" r="8" fill="var(--sense)"/><circle cx="492" cy="215" r="8" fill="var(--od)"/>
+        <circle cx="408" cy="250" r="8" fill="var(--gnd)"/><circle cx="492" cy="250" r="8" fill="var(--gnd)"/>
+      </g>
+      <g class="stext sm" style="fill:#9aa7b3">
+        <text x="392" y="114" text-anchor="end">1</text><text x="508" y="114">2</text>
+        <text x="392" y="149" text-anchor="end">3</text><text x="508" y="149">4</text>
+        <text x="392" y="184" text-anchor="end">5</text><text x="508" y="184">6</text>
+        <text x="392" y="219" text-anchor="end">7</text><text x="508" y="219">8</text>
+        <text x="392" y="254" text-anchor="end">9</text><text x="508" y="254">10</text>
+      </g>
+      <text class="stext" x="250" y="114" text-anchor="end" style="fill:var(--nc);font-weight:700">TCLK → NC</text>
+      <path d="M260 114 C290 114, 320 114, 395 110" fill="none" stroke="var(--nc)" stroke-width="2.5" stroke-dasharray="5 4"/>
+      <text class="stext sm" x="250" y="140" text-anchor="end" style="fill:var(--ink-2)">pas de fil vers Pico</text>
+      <rect x="620" y="90" width="220" height="140" rx="10" fill="var(--panel)" stroke="var(--line)"/>
+      <text class="stext sm" x="730" y="118" text-anchor="middle" style="fill:var(--ink);font-weight:700">Règle</text>
+      <text class="stext sm" x="640" y="148">• JTAG : TCLK utile</text>
+      <text class="stext sm" x="640" y="172">• BDM : DSCLK suffit</text>
+      <text class="stext sm" x="640" y="196">• JC1 monté = BDM</text>
+      <text class="stext sm" x="640" y="220" style="fill:var(--danger);font-weight:700">→ pin 1 ouverte</text>
+    </svg>
+  </div>
+
+  <!-- ========== 2 ========== -->
+  <h2><span class="n">02</span> Brancher le Pico au BDM (J33)</h2>
+  <p>Mapping sur GP <b>consécutifs</b> (GP2–GP8) pour un programme <b>PIO</b> unique sur DSCLK/DSI/DSO.
+  Directions relatives au Pico.</p>
+  <div class="twrap" style="margin-bottom:12px">
+    <table>
+      <thead><tr><th>J33</th><th>Signal</th><th>Direction</th><th>Pico GP / phys</th><th>Fil (suggestion)</th></tr></thead>
+      <tbody>
+        <tr><td class="m tabnum">9·10</td><td class="sig">GND</td><td><span class="chip c-gnd">masse</span></td><td class="m">GND / 3, 8, …</td><td>noir — <b>en premier</b></td></tr>
+        <tr><td class="m tabnum">6</td><td class="sig">DSCLK</td><td><span class="chip c-out">Pico → cible</span></td><td class="m">GP2 / 4</td><td>jaune — horloge PIO</td></tr>
+        <tr><td class="m tabnum">4</td><td class="sig">DSI</td><td><span class="chip c-out">Pico → cible</span></td><td class="m">GP3 / 5</td><td>orange</td></tr>
+        <tr><td class="m tabnum">3</td><td class="sig">DSO</td><td><span class="chip c-in">cible → Pico</span></td><td class="m">GP4 / 6</td><td>violet</td></tr>
+        <tr><td class="m tabnum">2</td><td class="sig">BKPT</td><td><span class="chip c-out">Pico → cible</span></td><td class="m">GP5 / 7</td><td>bleu</td></tr>
+        <tr><td class="m tabnum">8</td><td class="sig">RESET</td><td><span class="chip c-od">open-drain</span></td><td class="m">GP6 / 9</td><td>blanc — Hi-Z = relâché</td></tr>
+        <tr><td class="m tabnum">5</td><td class="sig">ALLPST</td><td><span class="chip c-in">cible → Pico</span></td><td class="m">GP7 / 10</td><td>gris — optionnel</td></tr>
+        <tr><td class="m tabnum">7</td><td class="sig">+3V3S</td><td><span class="chip c-sense">sense</span></td><td class="m">GP8 / 11 <span style="font-weight:400">(ou GP26 ADC)</span></td><td>vert — lecture seule</td></tr>
+        <tr><td class="m tabnum">1</td><td class="sig">TCLK</td><td><span class="chip c-nc">NC</span></td><td class="m">—</td><td>— <span class="tag lever">étape 01</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="schem">
+    <div class="cap">Fritzing · étape 2 — breadboard Pico ↔ J33</div>
+    <svg viewBox="0 0 920 560" role="img" aria-label="Schéma Fritzing Pico vers J33">
+      <!-- breadboard base -->
+      <rect x="40" y="40" width="840" height="480" rx="10" fill="#e8e0c8" stroke="#c4b896" stroke-width="2"/>
+      <text class="stext sm" x="60" y="64" style="fill:#5a5340">breadboard (vue type Fritzing)</text>
+
+      <!-- J33 left -->
+      <rect x="80" y="120" width="160" height="300" rx="12" fill="#26333f" stroke="#3a4a58" stroke-width="2"/>
+      <text class="stext" x="160" y="148" text-anchor="middle" style="fill:#cdd7e0;font-weight:700">J33</text>
+      <rect x="112" y="168" width="96" height="220" rx="6" fill="#15181c"/>
+      <g>
+        <circle cx="132" cy="192" r="7" fill="none" stroke="var(--nc)" stroke-width="2" stroke-dasharray="2 2"/>
+        <circle cx="188" cy="192" r="7" fill="var(--out)"/>
+        <circle cx="132" cy="232" r="7" fill="var(--in)"/><circle cx="188" cy="232" r="7" fill="var(--out)"/>
+        <circle cx="132" cy="272" r="7" fill="var(--in)"/><circle cx="188" cy="272" r="7" fill="var(--out)"/>
+        <circle cx="132" cy="312" r="7" fill="var(--sense)"/><circle cx="188" cy="312" r="7" fill="var(--od)"/>
+        <circle cx="132" cy="352" r="7" fill="var(--gnd)"/><circle cx="188" cy="352" r="7" fill="var(--gnd)"/>
+      </g>
+      <g class="stext sm" style="fill:#9aa7b3">
+        <text x="118" y="196" text-anchor="end">1 NC</text>
+        <text x="118" y="236" text-anchor="end">3</text><text x="204" y="236">4</text>
+        <text x="118" y="276" text-anchor="end">5</text><text x="204" y="276">6</text>
+        <text x="118" y="316" text-anchor="end">7</text><text x="204" y="316">8</text>
+        <text x="118" y="356" text-anchor="end">9</text><text x="204" y="356">10</text>
+        <text x="204" y="196">2</text>
+      </g>
+
+      <!-- Pico right -->
+      <rect x="620" y="90" width="150" height="400" rx="14" fill="#1f7a44" stroke="#12522c" stroke-width="2"/>
+      <rect x="672" y="78" width="46" height="26" rx="4" fill="#c9ccce" stroke="#8a9095"/>
+      <text class="stext sm" x="695" y="120" text-anchor="middle" style="fill:#dff3e6">USB</text>
+      <rect x="660" y="250" width="70" height="70" rx="6" fill="#111"/>
+      <text class="stext sm" x="695" y="290" text-anchor="middle" style="fill:#9aa">RP2040</text>
+      <text class="stext sm" x="695" y="340" text-anchor="middle" style="fill:#dff3e6;font-weight:700">Pico</text>
+      <rect x="683" y="450" width="24" height="16" rx="3" fill="#f2f2f2" stroke="#999"/>
+      <text class="stext sm" x="695" y="482" text-anchor="middle" style="fill:#dff3e6">BOOTSEL</text>
+      <g fill="#e8c760" stroke="#b8952f" stroke-width="0.5">
+        <circle cx="620" cy="140" r="4"/><circle cx="620" cy="160" r="4"/><circle cx="620" cy="180" r="4"/><circle cx="620" cy="200" r="4"/><circle cx="620" cy="220" r="4"/><circle cx="620" cy="240" r="4"/><circle cx="620" cy="260" r="4"/><circle cx="620" cy="280" r="4"/><circle cx="620" cy="300" r="4"/><circle cx="620" cy="320" r="4"/><circle cx="620" cy="340" r="4"/><circle cx="620" cy="360" r="4"/><circle cx="620" cy="380" r="4"/><circle cx="620" cy="400" r="4"/>
+      </g>
+
+      <!-- jumper wires -->
+      <g fill="none" stroke-width="5" stroke-linecap="round" opacity="0.92">
+        <path d="M132 352 C300 352, 400 160, 620 160" stroke="var(--gnd)"/>
+        <path d="M188 272 C320 272, 420 180, 620 180" stroke="var(--out)"/>
+        <path d="M188 232 C340 232, 430 200, 620 200" stroke="var(--out)"/>
+        <path d="M132 232 C340 232, 440 220, 620 220" stroke="var(--in)"/>
+        <path d="M188 192 C360 192, 450 240, 620 240" stroke="var(--out)"/>
+        <path d="M188 312 C340 312, 450 280, 620 280" stroke="var(--od)"/>
+        <path d="M132 272 C360 272, 460 300, 620 300" stroke="var(--in)"/>
+        <path d="M132 312 C360 312, 470 320, 620 320" stroke="var(--sense)"/>
+      </g>
+      <g class="stext sm" style="fill:#3d3a2e">
+        <text x="780" y="164">GND</text>
+        <text x="780" y="184">GP2 DSCLK</text>
+        <text x="780" y="204">GP3 DSI</text>
+        <text x="780" y="224">GP4 DSO</text>
+        <text x="780" y="244">GP5 BKPT</text>
+        <text x="780" y="284">GP6 RESET</text>
+        <text x="780" y="304">GP7 ALLPST</text>
+        <text x="780" y="324">GP8 +3V3S</text>
+      </g>
+      <text class="stext sm" x="460" y="500" text-anchor="middle" style="fill:#5a5340">Ordre : GND → sense → RESET OD → DSCLK/DSI/DSO → BKPT/ALLPST. Pin 1 sans fil.</text>
+    </svg>
+    <div class="legend">
+      <span><i class="dot" style="background:var(--out)"></i>OUT</span>
+      <span><i class="dot" style="background:var(--in)"></i>IN</span>
+      <span><i class="dot" style="background:var(--od)"></i>RESET OD</span>
+      <span><i class="dot" style="background:var(--sense)"></i>+3V3S</span>
+      <span><i class="dot" style="background:var(--gnd)"></i>GND</span>
+      <span><i class="dot" style="background:transparent;border:2px dashed var(--nc)"></i>TCLK NC</span>
+    </div>
+  </div>
+
+  <!-- ========== 3 ========== -->
+  <h2><span class="n">03</span> Programmer le Pico (firmware pont BDM)</h2>
+  <p>Le Pico n’exécute <b>pas</b> le pipeline métier (SREC, interlocks) : il est un <b>pod</b>.
+  Son firmware fait le timing BDM (PIO) et expose une liaison hôte.</p>
+
+  <div class="panel">
+    <h3 style="margin-top:0">Rôle du firmware Pico</h3>
+    <ul class="notes" style="margin-top:0">
+      <li><b>PIO</b> : bit-bang déterministe DSCLK/DSI/DSO (paquets 17 bits MSB-first, RM §33).</li>
+      <li><b>GPIO</b> : BKPT, RESET open-drain, lecture ALLPST / +3V3S.</li>
+      <li><b>USB CDC</b> <span class="tag primary">principal</span> : port série virtuel — commandes texte/binaires depuis le Mac.</li>
+      <li><b>UART</b> <span class="tag opt">optionnel</span> : même flux de commandes sur GP0 (TX) / GP1 (RX) pour debug.</li>
+    </ul>
+  </div>
+
+  <div class="schem">
+    <div class="cap">Fritzing · étape 3 — flasher le UF2 (BOOTSEL)</div>
+    <svg viewBox="0 0 900 280" role="img" aria-label="Mac vers Pico BOOTSEL UF2">
+      <rect x="60" y="70" width="200" height="140" rx="12" fill="#2c2c2e" stroke="#111"/>
+      <text class="stext" x="160" y="110" text-anchor="middle" style="fill:#fff;font-weight:700">Mac</text>
+      <text class="stext sm" x="160" y="140" text-anchor="middle" style="fill:#aaa">Finder</text>
+      <text class="stext sm" x="160" y="165" text-anchor="middle" style="fill:#64b5f6">RPI-RP2/</text>
+      <path d="M270 140 H380" stroke="var(--usb)" stroke-width="6" fill="none"/>
+      <text class="stext sm" x="325" y="125" text-anchor="middle" style="fill:var(--usb)">USB</text>
+      <rect x="400" y="60" width="140" height="160" rx="12" fill="#1f7a44" stroke="#12522c" stroke-width="2"/>
+      <rect x="447" y="48" width="46" height="24" rx="3" fill="#c9ccce"/>
+      <text class="stext sm" x="470" y="120" text-anchor="middle" style="fill:#dff3e6;font-weight:700">Pico</text>
+      <rect x="448" y="170" width="44" height="22" rx="4" fill="#f2f2f2" stroke="var(--danger)" stroke-width="2"/>
+      <text class="stext sm" x="470" y="210" text-anchor="middle" style="fill:#dff3e6">BOOTSEL</text>
+      <path d="M560 140 H640" stroke="var(--ink-2)" stroke-width="2" stroke-dasharray="4 3" fill="none"/>
+      <rect x="650" y="90" width="200" height="100" rx="10" fill="var(--panel)" stroke="var(--line)"/>
+      <text class="stext sm" x="750" y="125" text-anchor="middle" style="fill:var(--ink);font-weight:700">essensys-bdm.uf2</text>
+      <text class="stext sm" x="750" y="155" text-anchor="middle" style="fill:var(--ink-2)">glisser-déposer</text>
+    </svg>
+  </div>
+
+  <ol class="steps">
+    <li>Débrancher le Pico du BDM si besoin (sécurité).</li>
+    <li>Maintenir <b>BOOTSEL</b>, brancher USB au Mac, relâcher → volume <code>RPI-RP2</code>.</li>
+    <li>Copier le fichier <code>*.uf2</code> du firmware pont → le Pico redémarre seul.</li>
+    <li>Sans BOOTSEL, le même câble USB sert ensuite de <b>CDC</b> (étape 04).</li>
+  </ol>
+  <pre># Après flash (CDC actif), le Mac voit typiquement :
+ls /dev/cu.usbmodem*
+
+# Contenu logique du firmware (contrat) :
+# - CDC (et UART optionnel) : commandes ping | info | read | write | reset | halt
+# - PIO : trames BDM 17 bits ; DSCLK maître
+# - Interlocks flash CFM restent côté CLI Mac, pas dans le Pico</pre>
+
+  <!-- ========== 4 ========== -->
+  <h2><span class="n">04</span> Connecter le Pico au Mac</h2>
+  <h3>Chemin principal — USB CDC <span class="tag primary">recommandé</span></h3>
+  <p>Un seul câble USB : alimentation + flash UF2 + port série virtuel. Aucun dongle UART.</p>
+  <div class="schem">
+    <div class="cap">Fritzing · étape 4a — Mac ↔ Pico USB CDC (et Pico déjà câblé J33)</div>
+    <svg viewBox="0 0 920 300" role="img" aria-label="Mac USB CDC Pico J33">
+      <rect x="40" y="90" width="180" height="120" rx="12" fill="#2c2c2e"/>
+      <text class="stext" x="130" y="140" text-anchor="middle" style="fill:#fff;font-weight:700">Mac</text>
+      <text class="stext sm" x="130" y="168" text-anchor="middle" style="fill:#64b5f6">cu.usbmodem*</text>
+      <path d="M230 150 H320" stroke="var(--usb)" stroke-width="7" fill="none"/>
+      <text class="stext sm" x="275" y="135" text-anchor="middle" style="fill:var(--usb);font-weight:700">USB CDC</text>
+      <rect x="330" y="70" width="120" height="160" rx="12" fill="#1f7a44" stroke="#12522c" stroke-width="2"/>
+      <rect x="367" y="58" width="46" height="22" rx="3" fill="#c9ccce"/>
+      <text class="stext sm" x="390" y="150" text-anchor="middle" style="fill:#dff3e6;font-weight:700">Pico</text>
+      <text class="stext sm" x="390" y="175" text-anchor="middle" style="fill:#bfe3cc">PIO BDM</text>
+      <g fill="none" stroke-width="3.5" stroke-linecap="round">
+        <path d="M450 110 C520 90, 560 90, 620 100" stroke="var(--out)"/>
+        <path d="M450 130 C520 120, 560 120, 620 130" stroke="var(--in)"/>
+        <path d="M450 150 C520 150, 560 150, 620 160" stroke="var(--od)"/>
+        <path d="M450 180 C520 190, 560 200, 620 200" stroke="var(--gnd)"/>
+      </g>
+      <rect x="620" y="70" width="140" height="160" rx="12" fill="#26333f" stroke="#3a4a58" stroke-width="2"/>
+      <text class="stext" x="690" y="110" text-anchor="middle" style="fill:#cdd7e0;font-weight:700">J33</text>
+      <text class="stext sm" x="690" y="140" text-anchor="middle" style="fill:#9aa7b3">SC944D</text>
+      <text class="stext sm" x="690" y="200" text-anchor="middle" style="fill:var(--good)">JC1 = BDM</text>
+      <text class="stext sm" x="800" y="150" style="fill:var(--ink-2)">MCF52259</text>
+    </svg>
+  </div>
+  <pre># macOS — ouvrir le port CDC (exemple)
+screen /dev/cu.usbmodem* 115200
+# ou :  minicom -D /dev/cu.usbmodem* -b 115200
+# ou CLI projet :  essensys-bdm --transport pico-cdc --port /dev/cu.usbmodemXXXX</pre>
+
+  <h3>Chemin optionnel — UART série <span class="tag opt">debug</span></h3>
+  <p>Même protocole de commandes, sur UART0. Utile si CDC est indisponible ou pour un analyseur logique / second terminal.</p>
+  <div class="twrap" style="margin:12px 0">
+    <table>
+      <thead><tr><th>Pico</th><th>Signal</th><th>USB-UART (dongle)</th></tr></thead>
+      <tbody>
+        <tr><td class="m">GP0 / phys 1</td><td class="sig">UART0 TX</td><td>dongle RX</td></tr>
+        <tr><td class="m">GP1 / phys 2</td><td class="sig">UART0 RX</td><td>dongle TX</td></tr>
+        <tr><td class="m">GND</td><td class="sig">GND</td><td>GND</td></tr>
+        <tr><td class="m">—</td><td colspan="2">3,3 V logique uniquement (pas 5 V TTL)</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="schem">
+    <div class="cap">Fritzing · étape 4b — Mac ↔ USB-UART ↔ Pico (GP0/GP1) + BDM inchangé</div>
+    <svg viewBox="0 0 920 260" role="img" aria-label="UART debug path">
+      <rect x="40" y="70" width="140" height="100" rx="10" fill="#2c2c2e"/>
+      <text class="stext" x="110" y="125" text-anchor="middle" style="fill:#fff;font-weight:700">Mac</text>
+      <path d="M190 120 H250" stroke="var(--usb)" stroke-width="5" fill="none"/>
+      <rect x="250" y="80" width="130" height="80" rx="8" fill="#4a148c" stroke="#311b92"/>
+      <text class="stext sm" x="315" y="115" text-anchor="middle" style="fill:#e1bee7;font-weight:700">USB-UART</text>
+      <text class="stext sm" x="315" y="138" text-anchor="middle" style="fill:#ce93d8">3V3 · TX RX GND</text>
+      <path d="M380 105 H460" stroke="var(--uart)" stroke-width="3" fill="none"/>
+      <path d="M380 125 H460" stroke="var(--uart)" stroke-width="3" fill="none"/>
+      <path d="M380 145 H460" stroke="var(--gnd)" stroke-width="3" fill="none"/>
+      <rect x="460" y="60" width="110" height="140" rx="10" fill="#1f7a44" stroke="#12522c" stroke-width="2"/>
+      <text class="stext sm" x="515" y="120" text-anchor="middle" style="fill:#dff3e6;font-weight:700">Pico</text>
+      <text class="stext sm" x="515" y="145" text-anchor="middle" style="fill:#bfe3cc">GP0 TX</text>
+      <text class="stext sm" x="515" y="165" text-anchor="middle" style="fill:#bfe3cc">GP1 RX</text>
+      <path d="M570 130 H650" stroke="var(--out)" stroke-width="4" fill="none"/>
+      <rect x="650" y="80" width="120" height="100" rx="10" fill="#26333f"/>
+      <text class="stext" x="710" y="135" text-anchor="middle" style="fill:#cdd7e0;font-weight:700">J33</text>
+      <text class="stext sm" x="800" y="130" style="fill:var(--ink-2)">BDM inchangé</text>
+    </svg>
+  </div>
+  <div class="banner ok">
+    <span class="mk">C</span>
+    <div><b>CDC = défaut.</b> UART = second canal debug. Ne pas brancher CDC et UART en même temps
+    sur deux outils qui écrivent des commandes concurrentes vers le même moteur BDM.</div>
+  </div>
+
+  <!-- ========== 5 ========== -->
+  <h2><span class="n">05</span> Exporter / uploader le firmware cible</h2>
+  <p>Le Mac exécute le CLI <code>essensys-bdm</code> (ou équivalent). Le Pico transporte seulement les
+  accès mémoire BDM. Pipeline sûr (interlocks) :</p>
+  <div class="flow">
+    <div class="box"><b>1 · info</b> Identité / +3V3S / halt</div>
+    <div class="box"><b>2 · backup</b> Dump flash → fichier + sha256</div>
+    <div class="box"><b>3 · program</b> Zone app seulement</div>
+    <div class="box"><b>4 · verify</b> Relire + comparer</div>
+    <div class="box"><b>5 · reset</b> Relancer la cible</div>
+  </div>
+  <div class="schem">
+    <div class="cap">Fritzing · étape 5 — flux données firmware (export / upload)</div>
+    <svg viewBox="0 0 920 220" role="img" aria-label="Flux export upload firmware">
+      <rect x="40" y="50" width="160" height="120" rx="10" fill="var(--panel)" stroke="var(--line)"/>
+      <text class="stext sm" x="120" y="90" text-anchor="middle" style="fill:var(--ink);font-weight:700">SREC / bin</text>
+      <text class="stext sm" x="120" y="115" text-anchor="middle" style="fill:var(--ink-2)">image app</text>
+      <text class="stext sm" x="120" y="140" text-anchor="middle" style="fill:var(--ink-2)">0x3000–0x7DFFF</text>
+      <path d="M210 110 H270" stroke="var(--copper)" stroke-width="4" fill="none" marker-end="url(#arrow)"/>
+      <rect x="270" y="50" width="160" height="120" rx="10" fill="#2c2c2e"/>
+      <text class="stext sm" x="350" y="95" text-anchor="middle" style="fill:#fff;font-weight:700">CLI Mac</text>
+      <text class="stext sm" x="350" y="120" text-anchor="middle" style="fill:#aaa">interlocks CFM</text>
+      <text class="stext sm" x="350" y="145" text-anchor="middle" style="fill:#64b5f6">CDC / UART</text>
+      <path d="M440 110 H500" stroke="var(--usb)" stroke-width="4" fill="none"/>
+      <rect x="500" y="50" width="140" height="120" rx="10" fill="#1f7a44" stroke="#12522c" stroke-width="2"/>
+      <text class="stext sm" x="570" y="100" text-anchor="middle" style="fill:#dff3e6;font-weight:700">Pico</text>
+      <text class="stext sm" x="570" y="125" text-anchor="middle" style="fill:#bfe3cc">PIO BDM</text>
+      <path d="M650 110 H710" stroke="var(--out)" stroke-width="4" fill="none"/>
+      <rect x="710" y="50" width="160" height="120" rx="10" fill="#26333f"/>
+      <text class="stext sm" x="790" y="95" text-anchor="middle" style="fill:#cdd7e0;font-weight:700">Flash CFM</text>
+      <text class="stext sm" x="790" y="120" text-anchor="middle" style="fill:#9aa7b3">MCF52259</text>
+      <text class="stext sm" x="790" y="145" text-anchor="middle" style="fill:var(--danger)">≠ 0x400–0x417</text>
+    </svg>
+  </div>
+  <pre># Exemple de session (CDC) — noms CLI indicatifs
+essensys-bdm --transport pico-cdc --port /dev/cu.usbmodemXXXX info
+essensys-bdm --transport pico-cdc --port /dev/cu.usbmodemXXXX backup -o backup-$(date +%Y%m%d).bin
+essensys-bdm --transport pico-cdc --port /dev/cu.usbmodemXXXX program firmware-app.srec \
+  --backup-record backup-….json
+essensys-bdm --transport pico-cdc --port /dev/cu.usbmodemXXXX verify firmware-app.srec
+essensys-bdm --transport pico-cdc --port /dev/cu.usbmodemXXXX reset
+
+# Export = backup (lecture flash → fichier hôte)
+# Upload = program + verify (écriture zone application uniquement)</pre>
+  <div class="banner warn">
+    <span class="mk">CFM</span>
+    <div>Toute écriture dans <code>0x400–0x417</code> (Security Word inclus) est <b>interdite</b> par les
+    interlocks — risque de couper le BDM à jamais. Le Pico doit refuser / le CLI doit bloquer avant WRITE.</div>
+  </div>
+
+  <h2><span class="n">06</span> Checklist rapide</h2>
+  <div class="panel">
+    <ol class="steps" style="margin:0">
+      <li>JC1 = BDM ; J33-1 TCLK <b>non câblé</b>.</li>
+      <li>GND commun ; mapping GP2–GP8 ; RESET en open-drain ; +3V3S en sense.</li>
+      <li>UF2 flasheé (BOOTSEL) → firmware pont PIO + CDC.</li>
+      <li>Mac : <code>/dev/cu.usbmodem*</code> (CDC) ; UART GP0/1 seulement si debug.</li>
+      <li><code>info → backup → program → verify → reset</code> ; jamais sans backup vérifié.</li>
+    </ol>
+  </div>
+
+  <footer>
+    Sources : schéma <code>SDEC944-xD_Coeur</code> (J33), RM NXP <code>MCF52259RM</code> §33 (BDM),
+    notes R1 (<code>docs/R1-research-notes.md</code>), variantes
+    <code>docs/wiring-variants-pico-zero.html</code>.
+    Diagrammes type Fritzing — non validés sur matériel ; vérifier JC1 et 3,3 V avant branchement.
+    Firmware UF2 / transport <code>pico-cdc</code> : contrat documenté ici ; implémentation selon OpenSpec BDM.
+  </footer>
+</div>
+</body>
+</html>
