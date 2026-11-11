@@ -1,0 +1,128 @@
+{
+  "$schema": "./schema/feature.schema.json",
+  "id": "bdm-firmware-backup-2026-11-005",
+  "title": "Sauvegarder le firmware du BP SC944D en lecture seule via Pico et BDM",
+  "status": "proposed",
+  "owner": "nrineau",
+  "github": {
+    "issue": "essensys-hub/essensys-feature-lifecycle#65",
+    "project_item": "PVTI_lADODqt0Wc4BavHTzhHUE-Q"
+  },
+  "git": {
+    "branch": "feat/bdm-firmware-backup-2026-11-005",
+    "pr_url": null
+  },
+  "openspec": {
+    "change_id": "bdm-firmware-backup-2026-11-005",
+    "path": "openspec/changes/bdm-firmware-backup-2026-11-005",
+    "proposal": "openspec/changes/bdm-firmware-backup-2026-11-005/proposal.md",
+    "design": "openspec/changes/bdm-firmware-backup-2026-11-005/design.md",
+    "tasks": "openspec/changes/bdm-firmware-backup-2026-11-005/tasks.md",
+    "specs": [
+      "openspec/changes/bdm-firmware-backup-2026-11-005/specs/bdm-firmware-backup/spec.md"
+    ]
+  },
+  "implementation": {
+    "paths": [
+      "openspec/changes/bdm-firmware-backup-2026-11-005/tasks.md",
+      "src/bdm_programmer/backup.py"
+    ],
+    "primary_surface": "mixed"
+  },
+  "userguide": {
+    "pages": [
+      "README.md"
+    ],
+    "language": "fr",
+    "i18n_keys": [],
+    "screenshots": []
+  },
+  "tests": {
+    "playwright": [],
+    "junit": [],
+    "coverage_must_test": [
+      "aucune operation d'ecriture sur le chemin Pico",
+      "commande hors liste blanche refusee",
+      "carte non alimentee sans lecture",
+      "identite inattendue sans lecture",
+      "deux lectures identiques requises",
+      "rapport zone CFM",
+      "relance apres erreur",
+      "sortie refusee dans le depot"
+    ],
+    "smoke_tags": [
+      "@nr"
+    ]
+  },
+  "release": {
+    "changelog_entry": "Sauvegarde en lecture seule du firmware du BP via Pico et BDM.",
+    "target_tag": null,
+    "surfaces": [],
+    "paths": []
+  },
+  "security": {
+    "sca_tool": "dependabot+trivy",
+    "dependabot_alerts_url": "https://github.com/essensys-hub/essensys-bdm-programmer/security/dependabot",
+    "last_scan_at": null,
+    "cve_findings": {
+      "critical": 0,
+      "high": 0,
+      "medium": 0,
+      "low": 0
+    },
+    "secret_scan": {
+      "status": "warning",
+      "tool": "gitleaks",
+      "last_scan_at": null
+    },
+    "muted_findings": [],
+    "threat_model_url": null,
+    "owner_security": "rhinosys"
+  },
+  "bricks": {
+    "cloud": {
+      "scope": "not-concerned",
+      "reason": "outil de banc local, aucune API"
+    },
+    "portail-cloud": {
+      "scope": "not-concerned",
+      "reason": "aucune interface"
+    },
+    "gateway-cm5": {
+      "scope": "not-concerned",
+      "reason": "le Pico est branché sur le Mac, sans passer par la gateway"
+    },
+    "raspberry-pi": {
+      "scope": "not-concerned",
+      "reason": "le Pico n'utilise pas l'installation Raspberry"
+    },
+    "ansible": {
+      "scope": "not-concerned",
+      "reason": "rien à déployer"
+    },
+    "android": {
+      "scope": "not-concerned",
+      "reason": "aucun usage mobile"
+    },
+    "iphone": {
+      "scope": "not-concerned",
+      "reason": "aucun usage mobile"
+    },
+    "site-support": {
+      "scope": "not-concerned",
+      "reason": "outil réservé aux mainteneurs"
+    },
+    "documentation": {
+      "scope": "concerned",
+      "issue": "essensys-hub/essensys-doc#35"
+    },
+    "memoire": {
+      "scope": "concerned",
+      "issue": "essensys-hub/essensys-memory#36"
+    },
+    "firmware": {
+      "scope": "concerned",
+      "issue": "essensys-hub/essensys-bdm-programmer#1"
+    }
+  }
+}
