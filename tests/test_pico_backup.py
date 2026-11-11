@@ -17,7 +17,7 @@ from bdm_programmer.transport.pico_transport import (
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "firmware" / "pico"))
-import bdm_protocol as bp  # noqa: E402
+import bdm_protocol as bp
 
 
 class FakeHw:

@@ -1,3 +1,4 @@
+# ruff: noqa: UP031  (formatage % gardé pour rester simple côté MicroPython)
 """Agent BDM en lecture seule : logique sans matériel (MicroPython et CPython).
 
 Cette liste blanche est la barrière d'écriture : tout mot BDM envoyé à la cible

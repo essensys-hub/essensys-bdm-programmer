@@ -27,7 +27,7 @@
       "openspec/changes/bdm-firmware-backup-2026-11-005/tasks.md",
       "src/bdm_programmer/backup.py"
     ],
-    "primary_surface": "mixed"
+    "primary_surface": "ops"
   },
   "userguide": {
     "pages": [
@@ -39,7 +39,9 @@
   },
   "tests": {
     "playwright": [],
-    "junit": [],
+    "junit": [
+      "tests/test_pico_backup.py"
+    ],
     "coverage_must_test": [
       "aucune operation d'ecriture sur le chemin Pico",
       "commande hors liste blanche refusee",

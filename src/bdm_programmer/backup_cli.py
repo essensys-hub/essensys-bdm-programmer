@@ -34,12 +34,14 @@ def check_out_dir(out_dir: Path) -> None:
     inside = subprocess.run(
         ["git", "-C", str(probe), "rev-parse", "--is-inside-work-tree"],
         capture_output=True,
+        check=False,
     )
     if inside.returncode != 0:
         return
     ignored = subprocess.run(
         ["git", "-C", str(probe), "check-ignore", "-q", str(out_dir.resolve()) + "/"],
         capture_output=True,
+        check=False,
     )
     if ignored.returncode != 0:
         raise BackupError(f"{out_dir} est dans un dépôt Git et n'est pas ignoré : choisir un autre dossier")

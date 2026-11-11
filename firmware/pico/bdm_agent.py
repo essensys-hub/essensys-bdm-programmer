@@ -1,3 +1,4 @@
+# ruff: noqa: F821  (le DSL PIO de MicroPython définit pull, out, jmp... à l assemblage)
 """Agent MicroPython du Pico : pilote BDM PIO sur J33 et boucle USB.
 
 Toutes les broches restent en haute impédance tant que le +3V3S n'est pas validé.
@@ -8,9 +9,8 @@ import sys
 import time
 
 import rp2
-from machine import ADC, Pin
-
 from bdm_protocol import Agent
+from machine import ADC, Pin
 
 DSCLK, DSI, DSO, BKPT, RESET, ALLPST = 2, 3, 4, 5, 6, 7
 SENSE_ADC = 26
