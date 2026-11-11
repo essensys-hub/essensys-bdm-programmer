@@ -7,3 +7,8 @@ build/
 dist/
 backups/
 pre-rollback-backups/
+backup-*.bin
+backup-*.s19
+backup-*.sha256
+backup-*.json
+.artifacts/
