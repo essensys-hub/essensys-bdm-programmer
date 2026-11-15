@@ -1,6 +1,6 @@
 # Nomenclature de la carte de diagnostic BP
 
-Références relevées le 2026-11-15 dans l'index public du catalogue JLCPCB (`jlcsearch.tscircuit.com`). Stock et prix unitaires indicatifs, en dollars, à reconfirmer dans l'outil de commande JLCPCB au moment de commander (tâche 1.8).
+Références relevées le 2026-11-15 (LED : stock lu dans l'outil de commande JLCPCB, la verte C72043 étant en rupture) dans l'index public du catalogue JLCPCB (`jlcsearch.tscircuit.com`). Stock et prix unitaires indicatifs, en dollars, à reconfirmer dans l'outil de commande JLCPCB au moment de commander (tâche 1.8).
 
 ## Posés par JLCPCB (CMS, une face)
 
@@ -16,6 +16,7 @@ Références relevées le 2026-11-15 dans l'index public du catalogue JLCPCB (`j
 | D1, D2 | Écrêteurs 5,1 V de SDA et SCL | BZT52C5V1 | SOD-123 | C19077401 | 2 172 587 | 0,02 |
 | F1 | Fusible réarmable de la masse du port I2C, 50 mA / 60 V | JK-nSMD005/60V | 1206 | C2830235 | 696 810 | 0,03 |
 | D4 | Diode antiparallèle de la LED de défaut | 1N4148W | SOD-123 | C81598 | à relever | |
+| D3, D5 | LED rouge 0603 (défaut de branchement, activité) | KT-0603R | 0603 | C2286 (basic) | 5 767 780 | 0,007 |
 | J1 | USB-C 16 broches | KH-TYPE-C-16P | CMS | C709357 | 147 898 | 0,08 |
 | R, C | Résistances et condensateurs 0603 | pièces « basic » | 0603 | à figer au schéma | | |
 

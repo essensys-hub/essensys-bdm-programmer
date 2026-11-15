@@ -288,7 +288,7 @@ part("Y1", "Device:Crystal_GND24", "12MHz", "Crystal:Crystal_SMD_3225-4Pin_3.2x2
 part("SW1", "Switch:SW_Push", "BOOTSEL", "Button_Switch_SMD:SW_SPST_TL3342", 450, 160, {"1": "BOOT_SW", "2": GND}, "non monté : référence et empreinte à figer")
 part("J5", "Connector_Generic:Conn_01x03", "SWD analyseur", "Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical", 450, 200,
      {"1": "ANA_SWCLK", "2": GND, "3": "ANA_SWDIO"}, "non monté")
-part("D5", "Device:LED", "Activité", "LED_SMD:LED_0603_1608Metric", 450, 240, {"2": "ANA_LED_R", "1": GND}, "C72043")
+part("D5", "Device:LED", "Activité", "LED_SMD:LED_0603_1608Metric", 450, 240, {"2": "ANA_LED_R", "1": GND}, "C2286")
 
 # --- port de diagnostic I2C ---
 MPC3 = "Connector_Molex:Molex_Micro-Fit_3.0_43045-0412_2x02_P3.00mm_Vertical"  # empreinte à confronter au plan Würth 66200421122
@@ -300,7 +300,7 @@ part("U4", "74xGxx:74LVC2G17", "SN74LVC2G17", "Package_TO_SOT_SMD:SOT-23-6", 360
 part("D1", "Device:D_Zener", "5V1", "Diode_SMD:D_SOD-123", 460, 300, {"1": "SCL_IN", "2": GND}, "C19077401")
 part("D2", "Device:D_Zener", "5V1", "Diode_SMD:D_SOD-123", 480, 300, {"1": "SDA_IN", "2": GND}, "C19077401")
 part("F1", "Device:Polyfuse", "50mA 60V", "Fuse:Fuse_1206_3216Metric", 500, 300, {"1": "BUS_0V", "2": GND}, "C2830235")
-part("D3", "Device:LED", "Erreur de branchement", "LED_SMD:LED_0603_1608Metric", 520, 300, {"2": "FAULT_A", "1": GND}, "C72043")
+part("D3", "Device:LED", "Erreur de branchement", "LED_SMD:LED_0603_1608Metric", 520, 300, {"2": "FAULT_A", "1": GND}, "C2286")
 part("D4", "Device:D", "1N4148W", "Diode_SMD:D_SOD-123", 540, 300, {"1": "FAULT_A", "2": GND}, "C81598")
 
 # --- résistances et condensateurs (rangées automatiques) ---
