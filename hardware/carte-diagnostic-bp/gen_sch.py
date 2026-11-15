@@ -274,10 +274,10 @@ part("U6", "Memory_Flash:W25Q16JVSS", "W25Q16JVSS", "Package_SO:SOIC-8_5.3x5.3mm
      {"1": "QSPI_SS", "2": "QSPI_SD1", "3": "QSPI_SD2", "4": GND, "5": "QSPI_SD0", "6": "QSPI_SCLK", "7": "QSPI_SD3", "8": "+3V3"}, "C131025")
 part("Y1", "Device:Crystal_GND24", "12MHz", "Crystal:Crystal_SMD_3225-4Pin_3.2x2.5mm", 450, 120,
      {"1": "ANA_XIN", "3": "ANA_XOUT_X", "2": GND, "4": GND}, "C276421")
-part("SW1", "Switch:SW_Push", "BOOTSEL", "Button_Switch_SMD:SW_SPST_TL3342", 450, 160, {"1": "BOOT_SW", "2": GND}, "à figer")
+part("SW1", "Switch:SW_Push", "BOOTSEL", "Button_Switch_SMD:SW_SPST_TL3342", 450, 160, {"1": "BOOT_SW", "2": GND}, "non monté : référence et empreinte à figer")
 part("J5", "Connector_Generic:Conn_01x03", "SWD analyseur", "Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical", 450, 200,
      {"1": "ANA_SWCLK", "2": GND, "3": "ANA_SWDIO"}, "non monté")
-part("D5", "Device:LED", "Activité", "LED_SMD:LED_0603_1608Metric", 450, 240, {"2": "ANA_LED_R", "1": GND}, "basic")
+part("D5", "Device:LED", "Activité", "LED_SMD:LED_0603_1608Metric", 450, 240, {"2": "ANA_LED_R", "1": GND}, "C72043")
 
 # --- port de diagnostic I2C ---
 MPC3 = "Connector_Molex:Molex_Micro-Fit_3.0_43045-0412_2x02_P3.00mm_Vertical"  # empreinte à confronter au plan Würth 66200421122
@@ -289,7 +289,7 @@ part("U4", "74xGxx:74LVC2G17", "SN74LVC2G17", "Package_TO_SOT_SMD:SOT-23-6", 360
 part("D1", "Device:D_Zener", "5V1", "Diode_SMD:D_SOD-123", 460, 300, {"1": "SCL_IN", "2": GND}, "C19077401")
 part("D2", "Device:D_Zener", "5V1", "Diode_SMD:D_SOD-123", 480, 300, {"1": "SDA_IN", "2": GND}, "C19077401")
 part("F1", "Device:Polyfuse", "50mA 60V", "Fuse:Fuse_1206_3216Metric", 500, 300, {"1": "BUS_0V", "2": GND}, "C2830235")
-part("D3", "Device:LED", "Erreur de branchement", "LED_SMD:LED_0603_1608Metric", 520, 300, {"2": "FAULT_A", "1": GND}, "basic")
+part("D3", "Device:LED", "Erreur de branchement", "LED_SMD:LED_0603_1608Metric", 520, 300, {"2": "FAULT_A", "1": GND}, "C72043")
 part("D4", "Device:D", "1N4148W", "Diode_SMD:D_SOD-123", 540, 300, {"1": "FAULT_A", "2": GND}, "C81598")
 
 # --- résistances et condensateurs (rangées automatiques) ---
@@ -303,10 +303,13 @@ CS = [("C1", "10u", "VBUS"), ("C2", "22u", "+3V3"), ("C10", "1u", "+3V3"), ("C11
       ("C14", "100n", "+3V3"), ("C15", "100n", "+3V3"), ("C16", "15p", "ANA_XIN"), ("C17", "15p", "ANA_XOUT_X"),
       ("C18", "1u", "HUB_3V3"), ("C19", "100n", "HUB_3V3"), ("C20", "100n", "VBUS")]
 CS += [("C%d" % n, "100n", "+3V3") for n in range(3, 10)]
+# références LCSC des passifs 0603, vérifiées le 2026-11-15 dans l'index du catalogue JLCPCB
+R_LCSC = {"27": "C25190", "100": "C22775", "1k": "C21190", "4k7": "C23162", "5k1": "C23186", "10k": "C25804", "100k": "C25803", "1M": "C22935"}
+C_LCSC = {"15p": "C1644", "100n": "C14663", "1u": "C15849", "10u": "C19702", "22u": "C59461"}
 for i, (ref, val, a, b) in enumerate(sorted(RS, key=lambda r: int(r[0][1:]))):
-    part(ref, "Device:R", val, R0603, 30 + 17.78 * (i % 28), 370, {"1": a, "2": b}, "basic 0603")
+    part(ref, "Device:R", val, R0603, 30 + 17.78 * (i % 28), 370, {"1": a, "2": b}, R_LCSC[val])
 for i, (ref, val, net) in enumerate(sorted(CS, key=lambda c: int(c[0][1:]))):
-    part(ref, "Device:C", val, C0603, 30 + 17.78 * (i % 28), 400, {"1": net, "2": GND}, "basic 0603")
+    part(ref, "Device:C", val, C0603, 30 + 17.78 * (i % 28), 400, {"1": net, "2": GND}, C_LCSC[val])
 
 for ref, lid, val, fp, x, y, nets, lcsc, units in PARTS:
     seen = {}

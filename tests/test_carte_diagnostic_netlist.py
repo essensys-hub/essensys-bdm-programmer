@@ -67,3 +67,21 @@ def test_nr_bdm_programmer_67_carte_routee_drc_sans_erreur(tmp_path):
     r = subprocess.run([KICAD, "pcb", "drc", "--severity-all", "--exit-code-violations", "-o", str(tmp_path / "drc.rpt"),
                         str(HW / "carte-diagnostic-bp.kicad_pcb")], capture_output=True)
     assert r.returncode == 0, (tmp_path / "drc.rpt").read_text()
+
+
+def test_nr_bdm_programmer_67_dossier_de_fabrication_complet(tmp_path):
+    """Chaque composant du schéma est soit assemblé avec une référence LCSC, soit listé à souder à la main."""
+    import csv
+    import shutil as sh
+    work = tmp_path / "hw"
+    sh.copytree(HW, work, ignore=sh.ignore_patterns("fab"))
+    subprocess.run(["python3", str(work / "export_fab.py"), KICAD], check=True, capture_output=True)
+    fab = work / "fab"
+    bom = list(csv.DictReader(open(fab / "bom-jlcpcb.csv", encoding="utf-8")))
+    placed = {r["Designator"] for r in csv.DictReader(open(fab / "cpl-jlcpcb.csv", encoding="utf-8"))}
+    assembled = {d for r in bom for d in r["Designator"].split(",")}
+    manual = {r["Designator"] for r in csv.DictReader(open(fab / "a-souder-a-la-main.csv", encoding="utf-8"))}
+    assert assembled == placed and not assembled & manual
+    assert len(assembled | manual) == 66 and {"A1", "J2", "J3", "J4"} <= manual
+    assert all(r["LCSC Part #"].startswith("C") for r in bom)
+    assert (fab / "gerbers.zip").stat().st_size > 10000

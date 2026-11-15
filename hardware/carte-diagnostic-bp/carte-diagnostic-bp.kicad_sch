@@ -12364,7 +12364,7 @@
 		)
 		(property
 			"LCSC"
-			"à figer"
+			"non monté : référence et empreinte à figer"
 			(at 449.58 160.02 0)
 			(effects
 				(font
@@ -12644,7 +12644,7 @@
 		)
 		(property
 			"LCSC"
-			"basic"
+			"C72043"
 			(at 449.58 238.76 0)
 			(effects
 				(font
@@ -13891,7 +13891,7 @@
 		)
 		(property
 			"LCSC"
-			"basic"
+			"C72043"
 			(at 520.7 299.72 0)
 			(effects
 				(font
@@ -14145,7 +14145,7 @@
 		)
 		(property
 			"LCSC"
-			"basic 0603"
+			"C23186"
 			(at 30.48 370.84 0)
 			(effects
 				(font
@@ -14272,7 +14272,7 @@
 		)
 		(property
 			"LCSC"
-			"basic 0603"
+			"C23186"
 			(at 48.26 370.84 0)
 			(effects
 				(font
@@ -14399,7 +14399,7 @@
 		)
 		(property
 			"LCSC"
-			"basic 0603"
+			"C25190"
 			(at 66.04 370.84 0)
 			(effects
 				(font
@@ -14526,7 +14526,7 @@
 		)
 		(property
 			"LCSC"
-			"basic 0603"
+			"C25190"
 			(at 83.82 370.84 0)
 			(effects
 				(font
@@ -14653,7 +14653,7 @@
 		)
 		(property
 			"LCSC"
-			"basic 0603"
+			"C21190"
 			(at 101.6 370.84 0)
 			(effects
 				(font
@@ -14780,7 +14780,7 @@
 		)
 		(property
 			"LCSC"
-			"basic 0603"
+			"C21190"
 			(at 119.38 370.84 0)
 			(effects
 				(font
@@ -14907,7 +14907,7 @@
 		)
 		(property
 			"LCSC"
-			"basic 0603"
+			"C25804"
 			(at 137.16 370.84 0)
 			(effects
 				(font
@@ -15034,7 +15034,7 @@
 		)
 		(property
 			"LCSC"
-			"basic 0603"
+			"C21190"
 			(at 154.94 370.84 0)
 			(effects
 				(font
@@ -15161,7 +15161,7 @@
 		)
 		(property
 			"LCSC"
-			"basic 0603"
+			"C22775"
 			(at 172.72 370.84 0)
 			(effects
 				(font
@@ -15288,7 +15288,7 @@
 		)
 		(property
 			"LCSC"
-			"basic 0603"
+			"C22775"
 			(at 190.5 370.84 0)
 			(effects
 				(font
@@ -15415,7 +15415,7 @@
 		)
 		(property
 			"LCSC"
-			"basic 0603"
+			"C22775"
 			(at 208.28 370.84 0)
 			(effects
 				(font
@@ -15542,7 +15542,7 @@
 		)
 		(property
 			"LCSC"
-			"basic 0603"
+			"C22775"
 			(at 226.06 370.84 0)
 			(effects
 				(font
@@ -15669,7 +15669,7 @@
 		)
 		(property
 			"LCSC"
-			"basic 0603"
+			"C22775"
 			(at 243.84 370.84 0)
 			(effects
 				(font
@@ -15796,7 +15796,7 @@
 		)
 		(property
 			"LCSC"
-			"basic 0603"
+			"C22775"
 			(at 261.62 370.84 0)
 			(effects
 				(font
@@ -15923,7 +15923,7 @@
 		)
 		(property
 			"LCSC"
-			"basic 0603"
+			"C25804"
 			(at 279.4 370.84 0)
 			(effects
 				(font
@@ -16050,7 +16050,7 @@
 		)
 		(property
 			"LCSC"
-			"basic 0603"
+			"C22935"
 			(at 297.18 370.84 0)
 			(effects
 				(font
@@ -16177,7 +16177,7 @@
 		)
 		(property
 			"LCSC"
-			"basic 0603"
+			"C25803"
 			(at 314.96 370.84 0)
 			(effects
 				(font
@@ -16304,7 +16304,7 @@
 		)
 		(property
 			"LCSC"
-			"basic 0603"
+			"C25803"
 			(at 332.74 370.84 0)
 			(effects
 				(font
@@ -16431,7 +16431,7 @@
 		)
 		(property
 			"LCSC"
-			"basic 0603"
+			"C23162"
 			(at 350.52 370.84 0)
 			(effects
 				(font
@@ -16558,7 +16558,7 @@
 		)
 		(property
 			"LCSC"
-			"basic 0603"
+			"C21190"
 			(at 368.3 370.84 0)
 			(effects
 				(font
@@ -16685,7 +16685,7 @@
 		)
 		(property
 			"LCSC"
-			"basic 0603"
+			"C21190"
 			(at 386.08 370.84 0)
 			(effects
 				(font
@@ -16812,7 +16812,7 @@
 		)
 		(property
 			"LCSC"
-			"basic 0603"
+			"C21190"
 			(at 403.86 370.84 0)
 			(effects
 				(font
@@ -16939,7 +16939,7 @@
 		)
 		(property
 			"LCSC"
-			"basic 0603"
+			"C21190"
 			(at 421.64 370.84 0)
 			(effects
 				(font
@@ -17066,7 +17066,7 @@
 		)
 		(property
 			"LCSC"
-			"basic 0603"
+			"C21190"
 			(at 439.42 370.84 0)
 			(effects
 				(font
@@ -17193,7 +17193,7 @@
 		)
 		(property
 			"LCSC"
-			"basic 0603"
+			"C21190"
 			(at 457.2 370.84 0)
 			(effects
 				(font
@@ -17320,7 +17320,7 @@
 		)
 		(property
 			"LCSC"
-			"basic 0603"
+			"C19702"
 			(at 30.48 398.78 0)
 			(effects
 				(font
@@ -17447,7 +17447,7 @@
 		)
 		(property
 			"LCSC"
-			"basic 0603"
+			"C59461"
 			(at 48.26 398.78 0)
 			(effects
 				(font
@@ -17574,7 +17574,7 @@
 		)
 		(property
 			"LCSC"
-			"basic 0603"
+			"C14663"
 			(at 66.04 398.78 0)
 			(effects
 				(font
@@ -17701,7 +17701,7 @@
 		)
 		(property
 			"LCSC"
-			"basic 0603"
+			"C14663"
 			(at 83.82 398.78 0)
 			(effects
 				(font
@@ -17828,7 +17828,7 @@
 		)
 		(property
 			"LCSC"
-			"basic 0603"
+			"C14663"
 			(at 101.6 398.78 0)
 			(effects
 				(font
@@ -17955,7 +17955,7 @@
 		)
 		(property
 			"LCSC"
-			"basic 0603"
+			"C14663"
 			(at 119.38 398.78 0)
 			(effects
 				(font
@@ -18082,7 +18082,7 @@
 		)
 		(property
 			"LCSC"
-			"basic 0603"
+			"C14663"
 			(at 137.16 398.78 0)
 			(effects
 				(font
@@ -18209,7 +18209,7 @@
 		)
 		(property
 			"LCSC"
-			"basic 0603"
+			"C14663"
 			(at 154.94 398.78 0)
 			(effects
 				(font
@@ -18336,7 +18336,7 @@
 		)
 		(property
 			"LCSC"
-			"basic 0603"
+			"C14663"
 			(at 172.72 398.78 0)
 			(effects
 				(font
@@ -18463,7 +18463,7 @@
 		)
 		(property
 			"LCSC"
-			"basic 0603"
+			"C15849"
 			(at 190.5 398.78 0)
 			(effects
 				(font
@@ -18590,7 +18590,7 @@
 		)
 		(property
 			"LCSC"
-			"basic 0603"
+			"C15849"
 			(at 208.28 398.78 0)
 			(effects
 				(font
@@ -18717,7 +18717,7 @@
 		)
 		(property
 			"LCSC"
-			"basic 0603"
+			"C14663"
 			(at 226.06 398.78 0)
 			(effects
 				(font
@@ -18844,7 +18844,7 @@
 		)
 		(property
 			"LCSC"
-			"basic 0603"
+			"C14663"
 			(at 243.84 398.78 0)
 			(effects
 				(font
@@ -18971,7 +18971,7 @@
 		)
 		(property
 			"LCSC"
-			"basic 0603"
+			"C14663"
 			(at 261.62 398.78 0)
 			(effects
 				(font
@@ -19098,7 +19098,7 @@
 		)
 		(property
 			"LCSC"
-			"basic 0603"
+			"C14663"
 			(at 279.4 398.78 0)
 			(effects
 				(font
@@ -19225,7 +19225,7 @@
 		)
 		(property
 			"LCSC"
-			"basic 0603"
+			"C1644"
 			(at 297.18 398.78 0)
 			(effects
 				(font
@@ -19352,7 +19352,7 @@
 		)
 		(property
 			"LCSC"
-			"basic 0603"
+			"C1644"
 			(at 314.96 398.78 0)
 			(effects
 				(font
@@ -19479,7 +19479,7 @@
 		)
 		(property
 			"LCSC"
-			"basic 0603"
+			"C15849"
 			(at 332.74 398.78 0)
 			(effects
 				(font
@@ -19606,7 +19606,7 @@
 		)
 		(property
 			"LCSC"
-			"basic 0603"
+			"C14663"
 			(at 350.52 398.78 0)
 			(effects
 				(font
@@ -19733,7 +19733,7 @@
 		)
 		(property
 			"LCSC"
-			"basic 0603"
+			"C14663"
 			(at 368.3 398.78 0)
 			(effects
 				(font
