@@ -1,0 +1,53 @@
+{
+  "meta": {
+    "filename": "carte-diagnostic-bp.kicad_pro",
+    "version": 3
+  },
+  "schematic": {
+    "legacy_lib_dir": "",
+    "legacy_lib_list": []
+  },
+  "board": {
+    "design_settings": {
+      "rules": {
+        "min_track_width": 0.1,
+        "min_clearance": 0.127,
+        "min_via_diameter": 0.6,
+        "min_through_hole_diameter": 0.3,
+        "min_copper_edge_clearance": 0.3
+      }
+    }
+  },
+  "net_settings": {
+    "classes": [
+      {
+        "name": "Default",
+        "clearance": 0.15,
+        "track_width": 0.15,
+        "via_diameter": 0.6,
+        "via_drill": 0.3,
+        "priority": 2147483647,
+        "schematic_color": "rgba(0, 0, 0, 0.000)",
+        "pcb_color": "rgba(0, 0, 0, 0.000)",
+        "line_style": 0,
+        "wire_width": 6,
+        "bus_width": 12,
+        "microvia_diameter": 0.3,
+        "microvia_drill": 0.1,
+        "diff_pair_width": 0.2,
+        "diff_pair_gap": 0.25,
+        "diff_pair_via_gap": 0.25
+      }
+    ],
+    "meta": {
+      "version": 4
+    }
+  },
+  "sheets": [
+    [
+      "e46b59ee-1717-53c7-9b70-35b501863826",
+      "Root"
+    ]
+  ],
+  "text_variables": {}
+}

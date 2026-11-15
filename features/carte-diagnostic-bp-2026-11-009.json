@@ -1,0 +1,135 @@
+{
+  "$schema": "./schema/feature.schema.json",
+  "id": "carte-diagnostic-bp-2026-11-009",
+  "title": "Carte de diagnostic BP : BDM J33 et espion I2C sur un seul USB (PCB JLCPCB)",
+  "status": "proposed",
+  "owner": "nrineau",
+  "github": {
+    "issue": "essensys-hub/essensys-feature-lifecycle#67",
+    "project_item": "PVTI_lADODqt0Wc4BavHTzhI9tEo"
+  },
+  "git": {
+    "branch": "feat/carte-diagnostic-bp-2026-11-009",
+    "pr_url": null
+  },
+  "openspec": {
+    "change_id": "carte-diagnostic-bp-2026-11-009",
+    "path": "openspec/changes/carte-diagnostic-bp-2026-11-009",
+    "proposal": "openspec/changes/carte-diagnostic-bp-2026-11-009/proposal.md",
+    "design": "openspec/changes/carte-diagnostic-bp-2026-11-009/design.md",
+    "tasks": "openspec/changes/carte-diagnostic-bp-2026-11-009/tasks.md",
+    "specs": [
+      "openspec/changes/carte-diagnostic-bp-2026-11-009/specs/carte-diagnostic-bp/spec.md"
+    ]
+  },
+  "implementation": {
+    "paths": [
+      "openspec/changes/carte-diagnostic-bp-2026-11-009/tasks.md",
+      "hardware/carte-diagnostic-bp/README.md",
+      "hardware/carte-diagnostic-bp/gen_sch.py",
+      "hardware/carte-diagnostic-bp/check_netlist.py",
+      "hardware/carte-diagnostic-bp/carte-diagnostic-bp.kicad_sch",
+      "hardware/carte-diagnostic-bp/gen_pcb.py",
+      "hardware/carte-diagnostic-bp/carte-diagnostic-bp.kicad_pcb",
+      "hardware/carte-diagnostic-bp/carte-diagnostic-bp-tht.kicad_sch",
+      "hardware/carte-diagnostic-bp/carte-diagnostic-bp-tht.kicad_pcb",
+      "hardware/carte-diagnostic-bp/export_fab.py"
+    ],
+    "primary_surface": "ops"
+  },
+  "userguide": {
+    "pages": [
+      "hardware/carte-diagnostic-bp/README.md"
+    ],
+    "language": "fr",
+    "i18n_keys": [],
+    "screenshots": []
+  },
+  "tests": {
+    "playwright": [],
+    "junit": [
+      "tests/test_carte_diagnostic_netlist.py"
+    ],
+    "coverage_must_test": [
+      "brochage J33 conforme",
+      "broche 1 non connectee",
+      "+3V3S sans chemin d'alimentation",
+      "port I2C tolerant 15 V dans les deux polarites",
+      "ERC DRC et nets sans erreur"
+    ],
+    "smoke_tags": [
+      "@nr"
+    ]
+  },
+  "release": {
+    "changelog_entry": "Carte de diagnostic BP : BDM J33 et espion I2C sur un seul USB.",
+    "target_tag": null,
+    "surfaces": [],
+    "paths": []
+  },
+  "security": {
+    "sca_tool": "dependabot+trivy",
+    "dependabot_alerts_url": "https://github.com/essensys-hub/essensys-bdm-programmer/security/dependabot",
+    "last_scan_at": null,
+    "cve_findings": {
+      "critical": 0,
+      "high": 0,
+      "medium": 0,
+      "low": 0
+    },
+    "secret_scan": {
+      "status": "warning",
+      "tool": "gitleaks",
+      "last_scan_at": null
+    },
+    "muted_findings": [],
+    "threat_model_url": null,
+    "owner_security": "rhinosys"
+  },
+  "bricks": {
+    "cloud": {
+      "scope": "not-concerned",
+      "reason": "outil de banc local, aucune API"
+    },
+    "portail-cloud": {
+      "scope": "not-concerned",
+      "reason": "aucune interface"
+    },
+    "gateway-cm5": {
+      "scope": "not-concerned",
+      "reason": "la carte est branchée au Mac, sans passer par la gateway"
+    },
+    "raspberry-pi": {
+      "scope": "not-concerned",
+      "reason": "n'utilise pas l'installation Raspberry"
+    },
+    "ansible": {
+      "scope": "not-concerned",
+      "reason": "rien à déployer"
+    },
+    "android": {
+      "scope": "not-concerned",
+      "reason": "aucun usage mobile"
+    },
+    "iphone": {
+      "scope": "not-concerned",
+      "reason": "aucun usage mobile"
+    },
+    "site-support": {
+      "scope": "not-concerned",
+      "reason": "outil réservé aux mainteneurs"
+    },
+    "documentation": {
+      "scope": "concerned",
+      "issue": "essensys-hub/essensys-doc#43"
+    },
+    "memoire": {
+      "scope": "concerned",
+      "issue": "essensys-hub/essensys-memory#41"
+    },
+    "firmware": {
+      "scope": "concerned",
+      "issue": "essensys-hub/essensys-bdm-programmer#3"
+    }
+  }
+}

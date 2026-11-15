@@ -1,0 +1,44 @@
+# Contrôle du schéma KiCad de la carte de diagnostic BP
+# (feature carte-diagnostic-bp-2026-11-009, essensys-hub/essensys-feature-lifecycle#67).
+name: hardware
+
+on:
+  pull_request:
+    paths: ["hardware/**", "tests/test_carte_diagnostic_netlist.py", ".github/workflows/hardware.yml"]
+  push:
+    branches: [master]
+    paths: ["hardware/**"]
+
+permissions:
+  contents: read
+
+jobs:
+  kicad:
+    runs-on: ubuntu-24.04
+    container:
+      image: kicad/kicad:10.0
+      options: --user root
+    steps:
+      - uses: actions/checkout@v4
+      - name: Schémas à jour par rapport au générateur
+        run: |
+          export KICAD9_SYMBOL_DIR=/usr/share/kicad/symbols
+          CARTE_VARIANTE=tht python3 hardware/carte-diagnostic-bp/gen_sch.py
+          python3 hardware/carte-diagnostic-bp/gen_sch.py
+          git config --global --add safe.directory "$PWD"
+          git diff --exit-code -- hardware/carte-diagnostic-bp
+      - name: ERC, invariants de la netlist, DRC et dossier de fabrication, pour chaque variante
+        run: |
+          cd hardware/carte-diagnostic-bp
+          for v in "" tht; do
+            n=carte-diagnostic-bp${v:+-$v}
+            kicad-cli sch erc --severity-all --exit-code-violations -o /tmp/erc.rpt $n.kicad_sch
+            kicad-cli sch export netlist --format kicadsexpr -o /tmp/$n.net $n.kicad_sch
+            python3 check_netlist.py /tmp/$n.net
+            kicad-cli pcb drc --severity-all --exit-code-violations -o /tmp/drc.rpt $n.kicad_pcb
+            CARTE_VARIANTE=$v python3 export_fab.py
+          done
+      - uses: actions/upload-artifact@v4
+        with:
+          name: carte-diagnostic-bp-fab
+          path: hardware/carte-diagnostic-bp/fab*/
