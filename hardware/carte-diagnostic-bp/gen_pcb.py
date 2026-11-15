@@ -29,16 +29,19 @@ PLACE = {
     "J1": (40, 55.5, 0),     # USB-C, bord bas
     "U5": (40, 47, 0), "U2": (40, 38, 0), "Y2": (48, 38, 0), "U3": (54, 49, 0),
     "U1": (64, 24, 0), "U6": (78, 12, 0), "Y1": (64, 37, 0), "SW1": (67, 53, 0), "J5": (64, 5, 90), "D5": (72, 44, 0),
+    # découplage du RP2040, en couronne autour de U1
+    "C3": (57.2, 21, 90), "C4": (57.2, 27, 90), "C9": (59.5, 17.3, 0), "C8": (62.7, 17.3, 0), "C12": (65.9, 17.3, 0),
+    "C5": (61, 30.7, 0), "C13": (64.2, 30.7, 0), "C11": (67.4, 30.7, 0),
+    "C7": (70.8, 20.5, 90), "C10": (70.8, 24, 90), "C6": (70.8, 27.5, 90), "C14": (78, 17.5, 0),
     "J3": (92, 16, 0), "J4": (92, 42, 0), "U4": (80.5, 30.5, 0),
 }
 # grappes de composants passifs : (x0, y0, pas x, pas y, colonnes, angle, références)
 CLUSTERS = [
     (31, 30, 2.6, 0, 9, 90, ["R1", "R2", "C1", "C20", "C18", "C19"]),                       # USB et hub
-    (50, 55, 2.6, 0, 9, 90, ["C2", "C10"]),                                                   # régulateur
+    (50, 55, 2.6, 0, 9, 90, ["C2"]),                                                   # régulateur
     (27, 18, 2.6, 0, 9, 90, ["R10", "R11", "R12", "R13", "R14", "R15", "R16", "R17"]),        # série BDM et mesure
     (51, 16, 0, 2.6, 9, 0, ["R30", "R31", "R32", "R33", "R34", "R35"]),                        # prises analyseur
-    (55, 12, 2.6, 0, 8, 90, ["C3", "C4", "C5", "C6", "C7", "C8", "C9"]),                       # découplage RP2040, haut
-    (74, 20, 0, 2.6, 9, 0, ["C11", "C12", "C13", "C14", "R6", "R7"]),                          # découplage RP2040, droite
+    (74.5, 22, 0, 2.6, 9, 0, ["R6", "R7"]),                                                   # BOOTSEL et RUN
     (55, 42, 2.6, 0, 9, 90, ["C16", "C17", "R5", "R3", "R4", "R8"]),                           # quartz, USB, LED
     (80, 20.5, 0, 2.6, 4, 0, ["R20", "R21", "C15"]),                                             # port I2C
     (80, 36, 0, 3.2, 9, 0, ["D1", "D2", "F1", "R22", "D3", "D4"]),
@@ -64,6 +67,7 @@ def parse_netlist(path):
 def main(netlist):
     comps, padnets = parse_netlist(netlist)
     board = pcbnew.BOARD()
+    board.SetCopperLayerCount(4)
     place = dict(PLACE)
     for x0, y0, dx, dy, cols, ang, refs in CLUSTERS:
         for i, ref in enumerate(refs):
@@ -85,6 +89,8 @@ def main(netlist):
             sys.exit("empreinte introuvable : %s" % fpid)
         fp.SetReference(ref)
         fp.SetValue(value)
+        if ref[0] in "RCDF" and ref[1:].isdigit():  # carte dense : pas de repère sérigraphié pour les petits composants
+            fp.Reference().SetVisible(False)
         fp.SetFPID(pcbnew.LIB_ID(lib, name))
         x, y, ang = place[ref]
         board.Add(fp)
@@ -110,9 +116,24 @@ def main(netlist):
         seg.SetWidth(MM(0.1))
         board.Add(seg)
 
-    # règles : capacités standard JLCPCB 2 couches (piste et isolement 0,127 mm mini, via 0,3/0,6 mm)
+    # 4 couches : plan de masse (In1) et plan +3V3 (In2), signaux sur les faces externes
+    for layer, net in ((pcbnew.In1_Cu, "GND"), (pcbnew.In2_Cu, "+3V3")):
+        zone = pcbnew.ZONE(board)
+        zone.SetLayer(layer)
+        zone.SetNet(nets[net])
+        zone.SetZoneName(net)
+        outline = zone.Outline()
+        outline.NewOutline()
+        for x, y in ((0.5, 0.5), (W - 0.5, 0.5), (W - 0.5, H - 0.5), (0.5, H - 0.5)):
+            outline.Append(MM(OX + x), MM(OY + y))
+        zone.SetLocalClearance(MM(0.25))
+        zone.SetPadConnection(pcbnew.ZONE_CONNECTION_FULL)
+        zone.SetMinThickness(MM(0.2))
+        board.Add(zone)
+
+    # règles : capacités standard JLCPCB 4 couches (piste et isolement 0,127 mm mini, via 0,3/0,6 mm)
     bds = board.GetDesignSettings()
-    bds.m_TrackMinWidth = MM(0.15)
+    bds.m_TrackMinWidth = MM(0.127)
     bds.m_MinClearance = MM(0.15)
     bds.m_ViasMinSize = MM(0.6)
     bds.m_MinThroughDrill = MM(0.3)

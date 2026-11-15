@@ -21,7 +21,8 @@ Le Pico parle BDM sur J33 (2×5, pas de 2,54 mm) : DSCLK GP2, DSI GP3, DSO GP4, 
 - **Module Pico soudé (pastilles crénelées)**, pas de puce nue : firmware de la feature 005 inchangé, remplacement possible.
 - **Port J33 : embase 2×5 à détrompeur.** Résistances série sur chaque signal, broche 1 non connectée, +3V3S relié à GP26 par un pont diviseur à haute impédance, sans aucun chemin d'alimentation vers la cible.
 - **Port I2C tolérant 15 V.** SDA et SCL passent par une résistance série puis un écrêteur vers 3,3 V et un tampon à trigger de Schmitt (SN74LVC2G17). La résistance est dimensionnée pour que 15 V permanents, ou une inversion (−15 V), restent dans les limites de l'écrêteur. Le +15 V et le 0 V traversent de J1 vers J2 par des pistes dédiées ; le +15 V n'est relié à rien d'autre. La masse de mesure rejoint la broche 3 par un élément de protection, pour qu'une inversion 0 V / +15 V ne court-circuite pas le bus à travers l'USB.
-- **Fabrication : 2 couches, 1,6 mm, pièces du catalogue LCSC**, CMS sur une seule face. Les embases et le module Pico peuvent rester en soudure manuelle si l'assemblage traversant renchérit trop.
+- **Fabrication : 4 couches, 1,6 mm, pièces du catalogue LCSC.** Plan de masse en couche interne 1, plan +3V3 en couche interne 2, signaux sur les faces externes. Le routage en 2 couches n'aboutissait pas autour du RP2040 (11 liaisons d'alimentation restantes le 2026-11-15). Pistes de 0,15 mm, 0,1 mm au minimum en sortie du QFN, vias de 0,6/0,3 mm.
+- CMS sur une seule face. Les embases et le module Pico peuvent rester en soudure manuelle si l'assemblage traversant renchérit trop.
 - **Outillage : projet KiCad 10 versionné, ERC, DRC et export par `kicad-cli` en CI**, plus un contrôle des nets sur le modèle de `check_netlist.py` du dépôt sniffer.
 
 ## Risks / Trade-offs

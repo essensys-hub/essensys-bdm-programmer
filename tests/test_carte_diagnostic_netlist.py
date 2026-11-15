@@ -60,3 +60,10 @@ def test_nr_bdm_programmer_67_erc_drc_et_nets_sans_erreur(tmp_path):
     r = subprocess.run([KICAD, "sch", "erc", "--severity-all", "--exit-code-violations", "-o", str(tmp_path / "erc.rpt"),
                         str(HW / "carte-diagnostic-bp.kicad_sch")], capture_output=True)
     assert r.returncode == 0, (tmp_path / "erc.rpt").read_text()
+
+
+def test_nr_bdm_programmer_67_carte_routee_drc_sans_erreur(tmp_path):
+    """La carte routée versionnée passe le DRC sans violation ni liaison manquante."""
+    r = subprocess.run([KICAD, "pcb", "drc", "--severity-all", "--exit-code-violations", "-o", str(tmp_path / "drc.rpt"),
+                        str(HW / "carte-diagnostic-bp.kicad_pcb")], capture_output=True)
+    assert r.returncode == 0, (tmp_path / "drc.rpt").read_text()

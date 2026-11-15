@@ -32,3 +32,5 @@ jobs:
           kicad-cli sch erc --severity-all --exit-code-violations -o /tmp/erc.rpt carte-diagnostic-bp.kicad_sch
           kicad-cli sch export netlist --format kicadsexpr -o /tmp/carte.net carte-diagnostic-bp.kicad_sch
           python3 check_netlist.py /tmp/carte.net
+      - name: DRC de la carte routée
+        run: kicad-cli pcb drc --severity-all --exit-code-violations -o /tmp/drc.rpt hardware/carte-diagnostic-bp/carte-diagnostic-bp.kicad_pcb

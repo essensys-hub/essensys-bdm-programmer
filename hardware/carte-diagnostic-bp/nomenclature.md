@@ -1,6 +1,6 @@
 # Nomenclature de la carte de diagnostic BP
 
-Références relevées le 2026-11-15 dans l'index public du catalogue JLCPCB (`jlcsearch.tscircuit.com`). Stock et prix unitaires indicatifs, en dollars, à reconfirmer dans l'outil de commande JLCPCB au moment de commander (tâche 1.7).
+Références relevées le 2026-11-15 dans l'index public du catalogue JLCPCB (`jlcsearch.tscircuit.com`). Stock et prix unitaires indicatifs, en dollars, à reconfirmer dans l'outil de commande JLCPCB au moment de commander (tâche 1.8).
 
 ## Posés par JLCPCB (CMS, une face)
 

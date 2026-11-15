@@ -25,7 +25,7 @@ La masse de la carte, commune à l'USB du Mac et au BP par J33, rejoint la broch
 
 Elle n'est reliée qu'à la piste de passage J3 ↔ J4. Aucun composant de la carte n'y est connecté.
 
-## À vérifier sur banc (tâche 1.8)
+## À vérifier sur banc (tâche 1.9)
 
 - Fronts de SDA et SCL à l'oscilloscope, avec et sans la carte.
 - Essai 15 V sur chaque broche, dans les deux polarités, sur alimentation de laboratoire limitée en courant. Jamais sur une armoire réelle.

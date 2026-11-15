@@ -28,7 +28,9 @@
       "hardware/carte-diagnostic-bp/README.md",
       "hardware/carte-diagnostic-bp/gen_sch.py",
       "hardware/carte-diagnostic-bp/check_netlist.py",
-      "hardware/carte-diagnostic-bp/carte-diagnostic-bp.kicad_sch"
+      "hardware/carte-diagnostic-bp/carte-diagnostic-bp.kicad_sch",
+      "hardware/carte-diagnostic-bp/gen_pcb.py",
+      "hardware/carte-diagnostic-bp/carte-diagnostic-bp.kicad_pcb"
     ],
     "primary_surface": "ops"
   },

@@ -338,5 +338,13 @@ import json  # noqa: E402
 
 open(os.path.join(OUT, NAME + ".kicad_pro"), "w").write(json.dumps(
     {"meta": {"filename": NAME + ".kicad_pro", "version": 3}, "schematic": {"legacy_lib_dir": "", "legacy_lib_list": []},
+     # règles de fabrication : capacités JLCPCB 4 couches (piste et isolement 0,09 mm mini, via 0,3/0,6 mm), avec marge
+     "board": {"design_settings": {"rules": {"min_track_width": 0.1, "min_clearance": 0.127, "min_via_diameter": 0.6,
+                                             "min_through_hole_diameter": 0.3, "min_copper_edge_clearance": 0.3}}},
+     "net_settings": {"classes": [{"name": "Default", "clearance": 0.15, "track_width": 0.15, "via_diameter": 0.6, "via_drill": 0.3,
+                                   "priority": 2147483647, "schematic_color": "rgba(0, 0, 0, 0.000)", "pcb_color": "rgba(0, 0, 0, 0.000)",
+                                   "line_style": 0, "wire_width": 6, "bus_width": 12, "microvia_diameter": 0.3, "microvia_drill": 0.1,
+                                   "diff_pair_width": 0.2, "diff_pair_gap": 0.25, "diff_pair_via_gap": 0.25}],
+                      "meta": {"version": 4}},
      "sheets": [[ROOT, "Root"]], "text_variables": {}}, indent=2) + "\n")
 print("ok", NAME, len(PARTS), "composants")
