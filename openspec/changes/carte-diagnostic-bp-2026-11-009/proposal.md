@@ -7,7 +7,7 @@ Ticket : essensys-hub/essensys-feature-lifecycle#67.
 ## What Changes
 
 - Nouvelle carte « diagnostic BP », conçue sous KiCad dans `hardware/carte-diagnostic-bp/`, fabriquée et assemblée (CMS) par JLCPCB.
-- Un seul port USB-C : un hub embarqué relie le module Pico et un analyseur logique 8 voies (puce FX2, `fx2lafw`).
+- Un seul port USB-C : un hub embarqué relie le module Pico et un analyseur logique 8 voies (puce RP2040 nue, firmware `sigrok-pico`).
 - Port BP : embase 2×5 à détrompeur pour une nappe IDC 10 broches vers J33, au brochage de la feature 005.
 - Port de diagnostic I2C : deux embases Würth 4 broches en passage, écoute passive, chaque broche tolérant 15 V dans tous les sens de branchement.
 - Génération des fichiers de fabrication (Gerber, BOM, CPL) et contrôles ERC, DRC et nets en CI.
