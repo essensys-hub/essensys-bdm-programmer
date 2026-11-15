@@ -1,6 +1,6 @@
 ## 1. Carte de diagnostic BP (#3)
 
-- [ ] 1.1 Vérifier le stock et les références LCSC (FX2, hub, écrêteurs, embases) et figer la nomenclature
+- [x] 1.1 Vérifier le stock et les références LCSC (FX2, hub, écrêteurs, embases) et figer la nomenclature
 - [ ] 1.2 Dessiner le schéma KiCad dans `hardware/carte-diagnostic-bp/` : USB-C et hub, module Pico, FX2, port J33, port I2C protégé
 - [ ] 1.3 Écrire `check_netlist.py` et son test `NR-bdm-programmer-67` (brochage J33, broche 1 non connectée, +3V3S sans chemin d'alimentation)
 - [ ] 1.4 Dimensionner et simuler la protection 15 V du port I2C, dans les deux polarités
