@@ -9593,7 +9593,7 @@
 		)
 		(property
 			"Footprint"
-			"Module:RaspberryPi_Pico_SMD_HandSolder"
+			"Module:RaspberryPi_Pico_SMD"
 			(at 71.12 190.5 0)
 			(effects
 				(font

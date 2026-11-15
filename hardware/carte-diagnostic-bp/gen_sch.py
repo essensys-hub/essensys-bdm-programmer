@@ -256,7 +256,7 @@ pico = {str(n): None for n in range(1, 41)}
 pico.update({str(n): GND for n in (3, 8, 13, 18, 23, 28, 38)})  # 33 (AGND) et TP1 : déjà reliés au GND sur le module, laissés libres pour l'ERC
 pico.update({"4": "P_DSCLK", "5": "P_DSI", "6": "P_DSO", "7": "P_BKPT", "9": "P_RESET", "10": "P_ALLPST", "31": "SENSE_3V3S", "40": "VBUS",
              "TP1": None, "TP2": "PICO_DM", "TP3": "PICO_DP", "TP4": None, "TP5": None, "TP6": None, "D1": None, "D2": GND, "D3": None})
-part("A1", "MCU_Module:RaspberryPi_Pico_Extensive", "Pico (BDM)", "Module:RaspberryPi_Pico_SMD_HandSolder", 70, 190, pico, "soudé à la main")
+part("A1", "MCU_Module:RaspberryPi_Pico_Extensive", "Pico (BDM)", "Module:RaspberryPi_Pico_SMD", 70, 190, pico, "soudé à la main")
 j2 = {"1": None, "7": "J33_3V3S", "9": GND, "10": GND}
 j2.update({pin: "J33_" + s for s, pin in J33.items()})
 part("J2", "Connector_Generic:Conn_02x05_Odd_Even", "Nappe vers J33 du BP", "Connector_IDC:IDC-Header_2x05_P2.54mm_Vertical", 160, 180, j2, "soudé à la main")
