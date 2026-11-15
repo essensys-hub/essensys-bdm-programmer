@@ -25,7 +25,10 @@
   "implementation": {
     "paths": [
       "openspec/changes/carte-diagnostic-bp-2026-11-009/tasks.md",
-      "hardware/carte-diagnostic-bp/README.md"
+      "hardware/carte-diagnostic-bp/README.md",
+      "hardware/carte-diagnostic-bp/gen_sch.py",
+      "hardware/carte-diagnostic-bp/check_netlist.py",
+      "hardware/carte-diagnostic-bp/carte-diagnostic-bp.kicad_sch"
     ],
     "primary_surface": "ops"
   },
@@ -39,7 +42,9 @@
   },
   "tests": {
     "playwright": [],
-    "junit": [],
+    "junit": [
+      "tests/test_carte_diagnostic_netlist.py"
+    ],
     "coverage_must_test": [
       "brochage J33 conforme",
       "broche 1 non connectee",

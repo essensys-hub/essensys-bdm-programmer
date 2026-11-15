@@ -16,7 +16,7 @@ Le Pico parle BDM sur J33 (2×5, pas de 2,54 mm) : DSCLK GP2, DSI GP3, DSO GP4, 
 
 ## Decisions
 
-- **Hub USB 2.0 embarqué (type CH334) et USB-C unique.** Le Pico BDM et l'analyseur restent deux périphériques USB indépendants. Alternative écartée : un seul microcontrôleur pour les deux fonctions, qui lierait le firmware BDM en lecture seule à celui de l'analyseur.
+- **Hub USB 2.0 embarqué (CH334R) et USB-C unique.** Le Pico BDM et l'analyseur restent deux périphériques USB indépendants. Alternative écartée : un seul microcontrôleur pour les deux fonctions, qui lierait le firmware BDM en lecture seule à celui de l'analyseur.
 - **Analyseur : RP2040 nu, flash W25Q16 et quartz 12 MHz**, choisi le 2026-11-15 par le mainteneur à la place de la puce FX2 (0,99 $ contre 10,68 $). Firmware `sigrok-pico`, pilote libsigrok `raspberrypi-pico`. Voies D0 = SCL, D1 = SDA, D2 à D7 = DSCLK, DSI, DSO, BKPT, RESET, ALLPST, sur GP2 à GP9 de l'analyseur. Bouton BOOTSEL et points de test SWD pour le premier chargement du firmware.
 - **Module Pico soudé (pastilles crénelées)**, pas de puce nue : firmware de la feature 005 inchangé, remplacement possible.
 - **Port J33 : embase 2×5 à détrompeur.** Résistances série sur chaque signal, broche 1 non connectée, +3V3S relié à GP26 par un pont diviseur à haute impédance, sans aucun chemin d'alimentation vers la cible.

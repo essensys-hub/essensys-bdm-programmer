@@ -1,0 +1,17 @@
+{
+  "meta": {
+    "filename": "carte-diagnostic-bp.kicad_pro",
+    "version": 3
+  },
+  "schematic": {
+    "legacy_lib_dir": "",
+    "legacy_lib_list": []
+  },
+  "sheets": [
+    [
+      "e46b59ee-1717-53c7-9b70-35b501863826",
+      "Root"
+    ]
+  ],
+  "text_variables": {}
+}
