@@ -17,6 +17,8 @@ import sys
 import pcbnew
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+VARIANT = os.environ.get("CARTE_VARIANTE", "")
+NAME = "carte-diagnostic-bp" + ("-" + VARIANT if VARIANT else "")
 FPDIR = os.environ.get("KICAD9_FOOTPRINT_DIR", "/Applications/KiCad/KiCad.app/Contents/SharedSupport/footprints")
 W, H = 100.0, 60.0          # dimensions de la carte, mm
 OX, OY = 100.0, 100.0       # origine de la carte sur la feuille
@@ -72,6 +74,7 @@ def main(netlist):
     for x0, y0, dx, dy, cols, ang, refs in CLUSTERS:
         for i, ref in enumerate(refs):
             place[ref] = (x0 + dx * (i % cols), y0 + dy * (i % cols), ang)
+    place = {r: v for r, v in place.items() if r in comps}  # la variante à trous n'a ni hub ni son quartz
     missing = sorted(set(comps) - set(place))
     if missing:
         sys.exit("composants sans position : %s" % missing)
@@ -96,6 +99,10 @@ def main(netlist):
         board.Add(fp)
         fp.SetPosition(pcbnew.VECTOR2I(MM(OX + x), MM(OY + y)))
         fp.SetOrientationDegrees(ang)
+        if ref == "A1":  # l'origine de l'empreinte du Pico dépend de la variante : centrer ses 40 broches sur la position voulue
+            px = [p.GetPosition().x for p in fp.Pads() if p.GetNumber().isdigit()]
+            py = [p.GetPosition().y for p in fp.Pads() if p.GetNumber().isdigit()]
+            fp.Move(pcbnew.VECTOR2I(MM(OX + x) - (min(px) + max(px)) // 2, MM(OY + y) - (min(py) + max(py)) // 2))
         for pad in fp.Pads():
             key = (ref, pad.GetNumber())
             if key in padnets:
@@ -144,7 +151,7 @@ def main(netlist):
     nc.SetViaDiameter(MM(0.6))
     nc.SetViaDrill(MM(0.3))
 
-    out = os.path.join(HERE, "carte-diagnostic-bp.kicad_pcb")
+    out = os.path.join(HERE, NAME + ".kicad_pcb")
     pcbnew.SaveBoard(out, board)
     print("ok", len(comps), "empreintes,", len(nets), "nets ->", os.path.basename(out))
 

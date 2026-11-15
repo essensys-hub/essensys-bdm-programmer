@@ -18,7 +18,8 @@ import tempfile
 
 import pcbnew
 
-PCB = os.path.join(os.path.dirname(os.path.abspath(__file__)), "carte-diagnostic-bp.kicad_pcb")
+PCB = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                   "carte-diagnostic-bp" + ("-" + os.environ["CARTE_VARIANTE"] if os.environ.get("CARTE_VARIANTE") else "") + ".kicad_pcb")
 IGNORED = {"silk_overlap", "silk_over_copper", "silk_edge_clearance"}
 
 

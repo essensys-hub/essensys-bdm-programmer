@@ -16,7 +16,10 @@ import uuid
 
 KSYM = os.environ.get("KICAD9_SYMBOL_DIR", "/Applications/KiCad/KiCad.app/Contents/SharedSupport/symbols") + "/"
 OUT = os.path.dirname(os.path.abspath(__file__))
-NAME = "carte-diagnostic-bp"
+# Variante : "" = Pico soudé à plat, USB unique par hub ; "tht" = Pico sur broches traversantes, avec son propre câble USB
+VARIANT = os.environ.get("CARTE_VARIANTE", "")
+THT = VARIANT == "tht"
+NAME = "carte-diagnostic-bp" + ("-" + VARIANT if VARIANT else "")
 U = lambda s: str(uuid.uuid5(uuid.NAMESPACE_URL, "essensys-bdm-programmer/carte-diagnostic-bp/" + s))  # noqa: E731
 ROOT = U("root")
 G = 2.54
@@ -243,20 +246,28 @@ part("J1", "Connector:USB_C_Receptacle_USB2.0_16P", "USB-C", "Connector_USB:USB_
       "A5": "CC1", "B5": "CC2", "A6": "USB_DP", "B6": "USB_DP", "A7": "USB_DM", "B7": "USB_DM", "A8": None, "B8": None}, "C709357")
 part("U5", "Power_Protection:USBLC6-2SC6", "USBLC6-2SC6", "Package_TO_SOT_SMD:SOT-23-6", 100, 50,
      {"1": "USB_DM", "6": "USB_DM", "3": "USB_DP", "4": "USB_DP", "2": GND, "5": "VBUS"}, "C5261088")
-part("U2", "Interface_USB:CH334R", "CH334R", "Package_SO:QSOP-16_3.9x4.9mm_P0.635mm", 160, 60,
-     {"10": "USB_DM", "11": "USB_DP", "12": "VBUS", "13": "HUB_3V3", "14": GND, "15": "HUB_XO", "16": "HUB_XI", "9": None,
-      "8": "PICO_DP", "7": "PICO_DM", "6": "ANA_HUB_DP", "5": "ANA_HUB_DM", "4": None, "3": None, "2": None, "1": None}, "C4154405")
-part("Y2", "Device:Crystal_GND24", "12MHz", "Crystal:Crystal_SMD_3225-4Pin_3.2x2.5mm", 160, 110,
-     {"1": "HUB_XI", "3": "HUB_XO", "2": GND, "4": GND}, "C276421")
+if not THT:
+    part("U2", "Interface_USB:CH334R", "CH334R", "Package_SO:QSOP-16_3.9x4.9mm_P0.635mm", 160, 60,
+         {"10": "USB_DM", "11": "USB_DP", "12": "VBUS", "13": "HUB_3V3", "14": GND, "15": "HUB_XO", "16": "HUB_XI", "9": None,
+          "8": "PICO_DP", "7": "PICO_DM", "6": "ANA_HUB_DP", "5": "ANA_HUB_DM", "4": None, "3": None, "2": None, "1": None}, "C4154405")
+    part("Y2", "Device:Crystal_GND24", "12MHz", "Crystal:Crystal_SMD_3225-4Pin_3.2x2.5mm", 160, 110,
+         {"1": "HUB_XI", "3": "HUB_XO", "2": GND, "4": GND}, "C276421")
 part("U3", "Regulator_Linear:AMS1117-3.3", "AMS1117-3.3", "Package_TO_SOT_SMD:SOT-223-3_TabPin2", 220, 50,
      {"3": "VBUS", "2": "+3V3", "1": GND}, "C6186")
+
+if THT:  # sans le Pico sur VBUS, l'ERC a besoin d'un drapeau d'alimentation
+    part("#FLG01", "power:PWR_FLAG", "PWR_FLAG", "", 250, 50, {"1": "VBUS"}, "")
 
 # --- module Pico (BDM) et port J33 ---
 pico = {str(n): None for n in range(1, 41)}
 pico.update({str(n): GND for n in (3, 8, 13, 18, 23, 28, 38)})  # 33 (AGND) et TP1 : déjà reliés au GND sur le module, laissés libres pour l'ERC
-pico.update({"4": "P_DSCLK", "5": "P_DSI", "6": "P_DSO", "7": "P_BKPT", "9": "P_RESET", "10": "P_ALLPST", "31": "SENSE_3V3S", "40": "VBUS",
-             "TP1": None, "TP2": "PICO_DM", "TP3": "PICO_DP", "TP4": None, "TP5": None, "TP6": None, "D1": None, "D2": GND, "D3": None})
-part("A1", "MCU_Module:RaspberryPi_Pico_Extensive", "Pico (BDM)", "Module:RaspberryPi_Pico_SMD", 70, 190, pico, "soudé à la main")
+pico.update({"4": "P_DSCLK", "5": "P_DSI", "6": "P_DSO", "7": "P_BKPT", "9": "P_RESET", "10": "P_ALLPST", "31": "SENSE_3V3S"})
+if THT:
+    # Pico sur broches, alimenté par son propre micro-USB : VBUS (40) reste libre, seules les masses sont communes
+    part("A1", "MCU_Module:RaspberryPi_Pico", "Pico (BDM)", "Module:RaspberryPi_Pico_Common_THT", 70, 190, pico, "sur broches, soudé à la main")
+else:
+    pico.update({"40": "VBUS", "TP1": None, "TP2": "PICO_DM", "TP3": "PICO_DP", "TP4": None, "TP5": None, "TP6": None, "D1": None, "D2": GND, "D3": None})
+    part("A1", "MCU_Module:RaspberryPi_Pico_Extensive", "Pico (BDM)", "Module:RaspberryPi_Pico_SMD", 70, 190, pico, "soudé à la main")
 j2 = {"1": None, "7": "J33_3V3S", "9": GND, "10": GND}
 j2.update({pin: "J33_" + s for s, pin in J33.items()})
 part("J2", "Connector_Generic:Conn_02x05_Odd_Even", "Nappe vers J33 du BP", "Connector_IDC:IDC-Header_2x05_P2.54mm_Vertical", 160, 180, j2, "soudé à la main")
@@ -293,16 +304,20 @@ part("D3", "Device:LED", "Erreur de branchement", "LED_SMD:LED_0603_1608Metric",
 part("D4", "Device:D", "1N4148W", "Diode_SMD:D_SOD-123", 540, 300, {"1": "FAULT_A", "2": GND}, "C81598")
 
 # --- résistances et condensateurs (rangées automatiques) ---
-RS = [("R1", "5k1", "CC1", GND), ("R2", "5k1", "CC2", GND), ("R3", "27", "ANA_DM", "ANA_HUB_DM"), ("R4", "27", "ANA_DP", "ANA_HUB_DP"),
+RS = [("R1", "5k1", "CC1", GND), ("R2", "5k1", "CC2", GND),
+      ("R3", "27", "ANA_DM", "USB_DM" if THT else "ANA_HUB_DM"), ("R4", "27", "ANA_DP", "USB_DP" if THT else "ANA_HUB_DP"),
       ("R5", "1k", "ANA_XOUT", "ANA_XOUT_X"), ("R6", "1k", "QSPI_SS", "BOOT_SW"), ("R7", "10k", "ANA_RUN", "+3V3"), ("R8", "1k", "ANA_LED", "ANA_LED_R"),
       ("R16", "10k", "J33_3V3S", "SENSE_3V3S"), ("R17", "1M", "SENSE_3V3S", GND),
       ("R20", "100k", "BUS_SCL", "SCL_IN"), ("R21", "100k", "BUS_SDA", "SDA_IN"), ("R22", "4k7", "BUS_0V", "FAULT_A")]
 RS += [("R%d" % (10 + i), "100", "P_" + s, "J33_" + s) for i, s in enumerate(BDM)]
-RS += [("R%d" % (30 + i), "1k", "J33_" + s, "A_" + s) for i, s in enumerate(BDM)]
+# prises de l'analyseur : 10 kΩ en variante à deux alimentations USB, pour ne pas réalimenter une moitié éteinte par les signaux
+RS += [("R%d" % (30 + i), "10k" if THT else "1k", "J33_" + s, "A_" + s) for i, s in enumerate(BDM)]
 CS = [("C1", "10u", "VBUS"), ("C2", "22u", "+3V3"), ("C10", "1u", "+3V3"), ("C11", "1u", "+1V1"), ("C12", "100n", "+1V1"), ("C13", "100n", "+1V1"),
       ("C14", "100n", "+3V3"), ("C15", "100n", "+3V3"), ("C16", "15p", "ANA_XIN"), ("C17", "15p", "ANA_XOUT_X"),
       ("C18", "1u", "HUB_3V3"), ("C19", "100n", "HUB_3V3"), ("C20", "100n", "VBUS")]
 CS += [("C%d" % n, "100n", "+3V3") for n in range(3, 10)]
+if THT:
+    CS = [c for c in CS if c[0] not in ("C18", "C19", "C20")]
 # références LCSC des passifs 0603, vérifiées le 2026-11-15 dans l'index du catalogue JLCPCB
 R_LCSC = {"27": "C25190", "100": "C22775", "1k": "C21190", "4k7": "C23162", "5k1": "C23186", "10k": "C25804", "100k": "C25803", "1M": "C22935"}
 C_LCSC = {"15p": "C1644", "100n": "C14663", "1u": "C15849", "10u": "C19702", "22u": "C59461"}
@@ -319,24 +334,26 @@ for ref, lid, val, fp, x, y, nets, lcsc, units in PARTS:
 
 text("CARTE DE DIAGNOSTIC BP — BDM J33 (Pico) et espion I2C (RP2040) derrière un seul USB-C", 20, 20, 2.5, n="titre", bold=True)
 text("Lecture seule. Broche 1 de J33 non connectée, +3V3S mesuré seulement. Port I2C : chaque broche tolère 15 V.\n"
-     "Ne jamais brancher le micro-USB du module Pico : son USB passe par les pastilles TP2/TP3 vers le hub.", 20, 30, 1.5, n="regles")
+     + ("Variante à trous : le Pico garde son propre câble micro-USB, l'USB-C de la carte ne sert que l'analyseur."
+        if THT else "Ne jamais brancher le micro-USB du module Pico : son USB passe par les pastilles TP2/TP3 vers le hub."), 20, 30, 1.5, n="regles")
 for t, x, y in (("USB, HUB, ALIMENTATION", 20, 40), ("PICO BDM ET PORT J33", 20, 140), ("ANALYSEUR RP2040", 270, 40),
                 ("PORT DE DIAGNOSTIC I2C (PROTÉGÉ)", 240, 295), ("RÉSISTANCES", 20, 360), ("CONDENSATEURS", 20, 390)):
     text(t, x, y, 1.8, n=t, bold=True)
 
 sch = ["kicad_sch", ["version", "20250114"], ["generator", S("eeschema")], ["generator_version", S("9.0")],
        ["uuid", ROOT], ["paper", S("A2")],
-       ["title_block", ["title", S("Carte de diagnostic BP")], ["date", S("2026-11-15")], ["rev", S("A")],
+       ["title_block", ["title", S("Carte de diagnostic BP" + (" – variante Pico à trous" if THT else ""))], ["date", S("2026-11-15")], ["rev", S("A")],
         ["company", S("Essensys – essensys-bdm-programmer")],
         ["comment", "1", S("Feature: carte-diagnostic-bp-2026-11-009 – Refs essensys-hub/essensys-feature-lifecycle#67")],
         ["comment", "2", S("Usage sur banc uniquement, jamais sur une armoire réelle")]],
        ["lib_symbols"] + libsyms] + items + [["sheet_instances", ["path", S("/"), ["page", S("1")]]], ["embedded_fonts", "no"]]
 open(os.path.join(OUT, NAME + ".kicad_sch"), "w").write(dump(sch) + "\n")
-row = '\t(lib (name "%s")(type "KiCad")(uri "%s")(options "")(descr ""))\n'
-open(os.path.join(OUT, "sym-lib-table"), "w").write("(sym_lib_table\n\t(version 7)\n" + "".join(
-    row % (n, "${KICAD9_SYMBOL_DIR}/%s.kicad_sym" % n) for n in sorted({l.split(":")[0] for l in pinmap})) + ")\n")
-open(os.path.join(OUT, "fp-lib-table"), "w").write("(fp_lib_table\n\t(version 7)\n" + "".join(
-    row % (n, "${KICAD9_FOOTPRINT_DIR}/%s.pretty" % n) for n in sorted({p[3].split(":")[0] for p in PARTS})) + ")\n")
+if not VARIANT:  # tables de bibliothèques communes aux variantes, écrites par la carte de base
+    row = '\t(lib (name "%s")(type "KiCad")(uri "%s")(options "")(descr ""))\n'
+    open(os.path.join(OUT, "sym-lib-table"), "w").write("(sym_lib_table\n\t(version 7)\n" + "".join(
+        row % (n, "${KICAD9_SYMBOL_DIR}/%s.kicad_sym" % n) for n in sorted({l.split(":")[0] for l in pinmap} | {"power"})) + ")\n")
+    open(os.path.join(OUT, "fp-lib-table"), "w").write("(fp_lib_table\n\t(version 7)\n" + "".join(
+        row % (n, "${KICAD9_FOOTPRINT_DIR}/%s.pretty" % n) for n in sorted({p[3].split(":")[0] for p in PARTS})) + ")\n")
 import json  # noqa: E402
 
 open(os.path.join(OUT, NAME + ".kicad_pro"), "w").write(json.dumps(

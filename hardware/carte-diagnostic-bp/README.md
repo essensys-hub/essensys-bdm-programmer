@@ -14,6 +14,17 @@ Spécification : `openspec/changes/carte-diagnostic-bp-2026-11-009/`.
 | `nomenclature.md` | Références LCSC, stock et prix relevés |
 | `protection-port-i2c.md` | Calcul de la protection 15 V du port I2C |
 
+## Variantes
+
+| Variante | Fichiers | Pico | USB |
+|---|---|---|---|
+| Base | `carte-diagnostic-bp.*` | Soudé à plat (pastilles crénelées et TP2/TP3) | Un seul USB-C, hub CH334R vers le Pico et l'analyseur |
+| À trous (`CARTE_VARIANTE=tht`) | `carte-diagnostic-bp-tht.*` | Sur broches traversantes, remplaçable | Deux câbles : le micro-USB du Pico et l'USB-C de la carte pour l'analyseur |
+
+La variante à trous n'a ni hub ni son quartz (61 composants au lieu de 66). Le VBUS de la carte ne rejoint pas le Pico : les deux moitiés ont chacune leur alimentation USB et seules les masses sont communes. Les résistances de prise de l'analyseur passent de 1 kΩ à 10 kΩ, pour qu'une moitié éteinte ne soit pas réalimentée par les signaux de l'autre. Elle ne satisfait pas l'exigence « un seul port USB » de la spécification.
+
+Chaque script prend la variante dans la variable d'environnement `CARTE_VARIANTE` (vide ou `tht`).
+
 ## Régénérer et contrôler
 
     python3 hardware/carte-diagnostic-bp/gen_sch.py
@@ -40,11 +51,11 @@ Six composants ne sont pas assemblés par JLCPCB (`fab/a-souder-a-la-main.csv`) 
 
 ## État
 
-Carte de 100 × 60 mm, 4 couches, routée le 2026-11-15 : DRC à 0 violation et 0 liaison manquante, 301 pastilles conformes à la netlist du schéma. Les repères des petits composants (R, C, D, F) ne sont pas sérigraphiés.
+Les deux variantes font 100 × 60 mm en 4 couches et ont été routées le 2026-11-15 : DRC à 0 violation et 0 liaison manquante, pastilles conformes à la netlist du schéma (301 pour la base, 266 pour la variante à trous). Les repères des petits composants (R, C, D, F) ne sont pas sérigraphiés.
 
 Le routage sort d'un routeur automatique et **doit être relu avant toute commande** : paire USB non routée en différentiel, position du quartz, découplage. Le dossier de fabrication se génère, mais il n'a pas encore été chargé dans l'outil de commande JLCPCB.
 
-Les pastilles TP2 et TP3 du module Pico sont sous le module : elles demandent de la pâte à braser et de l'air chaud, ou un perçage de la carte à ajouter.
+Sur la carte de base, les pastilles TP2 et TP3 du module Pico sont sous le module : elles demandent de la pâte à braser et de l'air chaud, ou un perçage de la carte à ajouter.
 
 À confirmer avant la commande :
 
@@ -53,4 +64,4 @@ Les pastilles TP2 et TP3 du module Pico sont sous le module : elles demandent de
 - empreinte du connecteur USB-C KH-TYPE-C-16P ;
 - chaîne de capture RP2040 (tâche 1.2).
 
-Le micro-USB du module Pico ne doit jamais être branché : son USB passe par les pastilles TP2 et TP3 vers le hub.
+Sur la carte de base, le micro-USB du module Pico ne doit jamais être branché : son USB passe par les pastilles TP2 et TP3 vers le hub.

@@ -18,7 +18,8 @@ import sys
 import zipfile
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-NAME = "carte-diagnostic-bp"
+VARIANT = os.environ.get("CARTE_VARIANTE", "")
+NAME = "carte-diagnostic-bp" + ("-" + VARIANT if VARIANT else "")
 LAYERS = "F.Cu,In1.Cu,In2.Cu,B.Cu,F.Paste,B.Paste,F.SilkS,B.SilkS,F.Mask,B.Mask,Edge.Cuts"
 
 
@@ -29,7 +30,7 @@ def run(cli, *args):
 
 
 def main(cli=shutil.which("kicad-cli") or "/Applications/KiCad/KiCad.app/Contents/MacOS/kicad-cli"):
-    fab, sch, pcb = os.path.join(HERE, "fab"), os.path.join(HERE, NAME + ".kicad_sch"), os.path.join(HERE, NAME + ".kicad_pcb")
+    fab, sch, pcb = os.path.join(HERE, "fab" + ("-" + VARIANT if VARIANT else "")), os.path.join(HERE, NAME + ".kicad_sch"), os.path.join(HERE, NAME + ".kicad_pcb")
     shutil.rmtree(fab, ignore_errors=True)
     ger = os.path.join(fab, "gerbers")
     os.makedirs(ger)

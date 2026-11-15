@@ -30,7 +30,10 @@
       "hardware/carte-diagnostic-bp/check_netlist.py",
       "hardware/carte-diagnostic-bp/carte-diagnostic-bp.kicad_sch",
       "hardware/carte-diagnostic-bp/gen_pcb.py",
-      "hardware/carte-diagnostic-bp/carte-diagnostic-bp.kicad_pcb"
+      "hardware/carte-diagnostic-bp/carte-diagnostic-bp.kicad_pcb",
+      "hardware/carte-diagnostic-bp/carte-diagnostic-bp-tht.kicad_sch",
+      "hardware/carte-diagnostic-bp/carte-diagnostic-bp-tht.kicad_pcb",
+      "hardware/carte-diagnostic-bp/export_fab.py"
     ],
     "primary_surface": "ops"
   },

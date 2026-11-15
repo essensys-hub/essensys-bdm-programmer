@@ -25,6 +25,8 @@ Le Pico parle BDM sur J33 (2×5, pas de 2,54 mm) : DSCLK GP2, DSI GP3, DSO GP4, 
 - CMS sur une seule face. Les embases et le module Pico peuvent rester en soudure manuelle si l'assemblage traversant renchérit trop.
 - **Outillage : projet KiCad 10 versionné, ERC, DRC et export par `kicad-cli` en CI**, plus un contrôle des nets sur le modèle de `check_netlist.py` du dépôt sniffer.
 
+- **Variante à trous (2026-11-15, demande du mainteneur).** Le Pico est monté sur broches traversantes et garde son propre câble micro-USB. Le hub est retiré, l'USB-C ne dessert que l'analyseur, et le VBUS de la carte ne rejoint pas le Pico. Cette variante s'écarte de l'exigence « un seul port USB » ; elle est livrée à côté de la carte de base, sans la remplacer.
+
 ## Risks / Trade-offs
 
 - Le pilote `raspberrypi-pico` est absent de libsigrok 0.5.2, la version installée par Homebrew (vérifié le 2026-11-15 : seul `fx2lafw` est listé) → compiler libsigrok depuis les sources, ou écrire un firmware de capture propre lu directement par `essensys-i2c-sniff`. À trancher avant le routage, avec un Pico du commerce chargé de `sigrok-pico`.

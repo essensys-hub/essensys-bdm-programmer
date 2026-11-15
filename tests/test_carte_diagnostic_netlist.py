@@ -22,12 +22,35 @@ check_netlist = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(check_netlist)
 
 
+# variantes de la carte : "" = Pico soudé à plat et USB unique, "tht" = Pico sur broches avec son propre câble USB
+VARIANTS = {"": 66, "tht": 61}
+
+
+def name(variant):
+    return "carte-diagnostic-bp" + ("-" + variant if variant else "")
+
+
+@pytest.fixture(scope="module", params=list(VARIANTS), ids=["base", "tht"])
+def variant(request):
+    return request.param
+
+
 @pytest.fixture(scope="module")
-def netlist(tmp_path_factory):
+def netlist(tmp_path_factory, variant):
     out = tmp_path_factory.mktemp("net") / "carte.net"
     subprocess.run([KICAD, "sch", "export", "netlist", "--format", "kicadsexpr", "-o", str(out),
-                    str(HW / "carte-diagnostic-bp.kicad_sch")], check=True, capture_output=True)
+                    str(HW / (name(variant) + ".kicad_sch"))], check=True, capture_output=True)
     return out.read_text(encoding="utf-8")
+
+
+def test_nr_bdm_programmer_67_variante_a_trous_sans_alimentation_croisee(netlist, variant):
+    """En variante à trous, le VBUS de la carte ne rejoint pas le Pico, alimenté par son propre câble."""
+    nets, loose, _ = check_netlist.parse(netlist)
+    if variant == "tht":
+        assert "A1.40" in loose and not any(n.startswith("U2.") for v in nets.values() for n in v)
+        assert not any(n.startswith("A1.") for n in nets["VBUS"])
+    else:
+        assert "A1.40" in nets["VBUS"]
 
 
 def test_nr_bdm_programmer_67_brochage_j33_conforme(netlist):
@@ -56,32 +79,33 @@ def test_nr_bdm_programmer_67_ecart_detecte(netlist):
         '(ref "J4")\n\t\t\t\t(pin "4")', '(ref "U4")\n\t\t\t\t(pin "9")')) != []
 
 
-def test_nr_bdm_programmer_67_erc_drc_et_nets_sans_erreur(tmp_path):
+def test_nr_bdm_programmer_67_erc_drc_et_nets_sans_erreur(tmp_path, variant):
     r = subprocess.run([KICAD, "sch", "erc", "--severity-all", "--exit-code-violations", "-o", str(tmp_path / "erc.rpt"),
-                        str(HW / "carte-diagnostic-bp.kicad_sch")], capture_output=True)
+                        str(HW / (name(variant) + ".kicad_sch"))], capture_output=True)
     assert r.returncode == 0, (tmp_path / "erc.rpt").read_text()
 
 
-def test_nr_bdm_programmer_67_carte_routee_drc_sans_erreur(tmp_path):
+def test_nr_bdm_programmer_67_carte_routee_drc_sans_erreur(tmp_path, variant):
     """La carte routée versionnée passe le DRC sans violation ni liaison manquante."""
     r = subprocess.run([KICAD, "pcb", "drc", "--severity-all", "--exit-code-violations", "-o", str(tmp_path / "drc.rpt"),
-                        str(HW / "carte-diagnostic-bp.kicad_pcb")], capture_output=True)
+                        str(HW / (name(variant) + ".kicad_pcb"))], capture_output=True)
     assert r.returncode == 0, (tmp_path / "drc.rpt").read_text()
 
 
-def test_nr_bdm_programmer_67_dossier_de_fabrication_complet(tmp_path):
+def test_nr_bdm_programmer_67_dossier_de_fabrication_complet(tmp_path, variant):
     """Chaque composant du schéma est soit assemblé avec une référence LCSC, soit listé à souder à la main."""
     import csv
     import shutil as sh
     work = tmp_path / "hw"
-    sh.copytree(HW, work, ignore=sh.ignore_patterns("fab"))
-    subprocess.run(["python3", str(work / "export_fab.py"), KICAD], check=True, capture_output=True)
-    fab = work / "fab"
+    sh.copytree(HW, work, ignore=sh.ignore_patterns("fab*"))
+    subprocess.run(["python3", str(work / "export_fab.py"), KICAD], check=True, capture_output=True,
+                   env={**os.environ, "CARTE_VARIANTE": variant})
+    fab = work / ("fab" + ("-" + variant if variant else ""))
     bom = list(csv.DictReader(open(fab / "bom-jlcpcb.csv", encoding="utf-8")))
     placed = {r["Designator"] for r in csv.DictReader(open(fab / "cpl-jlcpcb.csv", encoding="utf-8"))}
     assembled = {d for r in bom for d in r["Designator"].split(",")}
     manual = {r["Designator"] for r in csv.DictReader(open(fab / "a-souder-a-la-main.csv", encoding="utf-8"))}
     assert assembled == placed and not assembled & manual
-    assert len(assembled | manual) == 66 and {"A1", "J2", "J3", "J4"} <= manual
+    assert len(assembled | manual) == VARIANTS[variant] and {"A1", "J2", "J3", "J4"} <= manual
     assert all(r["LCSC Part #"].startswith("C") for r in bom)
     assert (fab / "gerbers.zip").stat().st_size > 10000

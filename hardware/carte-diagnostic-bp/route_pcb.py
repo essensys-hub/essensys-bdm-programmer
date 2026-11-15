@@ -16,7 +16,8 @@ import tempfile
 import pcbnew
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-PCB = os.path.join(HERE, "carte-diagnostic-bp.kicad_pcb")
+PCB = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                   "carte-diagnostic-bp" + ("-" + os.environ["CARTE_VARIANTE"] if os.environ.get("CARTE_VARIANTE") else "") + ".kicad_pcb")
 
 
 def stitch(board):
