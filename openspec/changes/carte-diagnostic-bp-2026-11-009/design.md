@@ -2,6 +2,12 @@
 
 Le Pico parle BDM sur J33 (2×5, pas de 2,54 mm) : DSCLK GP2, DSI GP3, DSO GP4, BKPT GP5, RESET GP6 en collecteur ouvert, ALLPST GP7, +3V3S mesuré sur GP26, broche 1 (TCLK) non connectée, masse en 9 et 10. Le bus BP↔BA passe par des embases Würth 4 broches : 1 SDA, 2 SCL, 3 0 V, 4 +15 V. L'analyseur FX2 externe (`fx2lafw`, 24 MHz) est déjà validé avec le décodeur de `essensys-i2c-ba-sniffer` ; il sert de référence pour valider l'analyseur de la carte.
 
+## Statut : prototype de essensys-i2c-ba-sniffer#10
+
+Décision du mainteneur du 2026-11-15 : la carte finale est spécifiée par la Task essensys-hub/essensys-i2c-ba-sniffer#10 (RP2350 nu, analyseur FX2, ports BP/BDM et BA/ICSP, capacité `sniffer-pcb-card`). La carte de ce change en est le prototype matériel. Elle valide les connecteurs, la protection 15 V, l'assemblage JLCPCB et la lecture BDM par la nappe ; elle ne remplace pas la carte finale. Les écarts connus : module Pico, analyseur RP2040 en USB Full-Speed, pas de port ICSP, six voies BDM non tamponnées.
+
+Le brochage du port I2C a été relu sur le schéma du BP (`SC944D_Schematic.pdf`, feuille « Liaison Boîtiers Auxiliaires ») : J31, Würth 66200421122, 1 BA_SDA, 2 BA_SCL, 3 GND, 4 BA_ALIM (+15VSP par la perle L31, sans fusible), tirages de 1 kΩ vers +5VS.
+
 ## Goals / Non-Goals
 
 **Goals:**

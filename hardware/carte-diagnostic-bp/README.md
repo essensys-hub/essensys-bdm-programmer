@@ -4,6 +4,8 @@ Carte de banc : accès BDM au BP (J33, nappe 10 broches), écoute passive du bus
 
 Spécification : `openspec/changes/carte-diagnostic-bp-2026-11-009/`.
 
+**Prototype.** La carte finale est spécifiée par essensys-hub/essensys-i2c-ba-sniffer#10 ; celle-ci sert à valider les connecteurs, la protection 15 V, l'assemblage JLCPCB et la lecture BDM par la nappe.
+
 | Fichier | Rôle |
 |---|---|
 | `gen_sch.py` | Décrit le circuit (table broche → net) et génère `carte-diagnostic-bp.kicad_sch` |
@@ -56,6 +58,8 @@ Les deux variantes font 100 × 60 mm en 4 couches et ont été routées le 2026-
 Le routage sort d'un routeur automatique et **doit être relu avant toute commande** : paire USB non routée en différentiel, position du quartz, découplage. Le dossier de fabrication se génère, mais il n'a pas encore été chargé dans l'outil de commande JLCPCB.
 
 Sur la carte de base, les pastilles TP2 et TP3 du module Pico sont sous le module : elles demandent de la pâte à braser et de l'air chaud, ou un perçage de la carte à ajouter.
+
+Défaut connu : le connecteur USB-C (J1) est en retrait d'environ 0,5 mm du bord de la carte ; certains câbles peuvent buter. À rapprocher du bord à la prochaine révision. Dans l'outil JLCPCB, J1 doit aussi être remonté d'environ 1,5 mm pour tomber sur ses pastilles.
 
 À confirmer avant la commande :
 
