@@ -6,8 +6,8 @@
 Sorties : ``fab/gerbers.zip`` (cuivre, masques, pâte, sérigraphie, contour, perçages),
 ``fab/bom-jlcpcb.csv`` et ``fab/cpl-jlcpcb.csv``. Seuls les composants dont le champ LCSC
 est une référence « C<nombre> » sont assemblés ; les autres sont listés dans
-``fab/a-souder-a-la-main.csv``. Les rotations du fichier de placement sont celles de KiCad :
-à contrôler dans l'aperçu de l'outil de commande JLCPCB avant de valider.
+``fab/a-souder-a-la-main.csv``. Les rotations du fichier de placement sont celles de KiCad, corrigées par ``JLC_ROTATION`` ;
+elles restent à contrôler dans l'aperçu de l'outil de commande JLCPCB avant de valider.
 """
 import csv
 import os
@@ -20,6 +20,9 @@ import zipfile
 HERE = os.path.dirname(os.path.abspath(__file__))
 VARIANT = os.environ.get("CARTE_VARIANTE", "")
 NAME = "carte-diagnostic-bp" + ("-" + VARIANT if VARIANT else "")
+# Corrections de rotation (degrés, sens antihoraire) entre l'orientation KiCad et celle de la bibliothèque JLCPCB,
+# relevées le 2026-11-15 dans l'aperçu « Component Placements » de l'outil de commande, par référence LCSC.
+JLC_ROTATION = {"C6186": 180, "C5261088": 180, "C10429": 270, "C131025": 270}  # AMS1117, USBLC6-2SC6, SN74LVC2G17, W25Q16
 LAYERS = "F.Cu,In1.Cu,In2.Cu,B.Cu,F.Paste,B.Paste,F.SilkS,B.SilkS,F.Mask,B.Mask,Edge.Cuts"
 
 
@@ -72,7 +75,8 @@ def main(cli=shutil.which("kicad-cli") or "/Applications/KiCad/KiCad.app/Content
         w = csv.writer(f)
         w.writerow(["Designator", "Mid X", "Mid Y", "Layer", "Rotation"])
         for r in sorted(rows, key=lambda r: key(r["Ref"])):
-            w.writerow([r["Ref"], r["PosX"] + "mm", r["PosY"] + "mm", "Top", r["Rot"]])
+            rot = (float(r["Rot"]) + JLC_ROTATION.get(smt[r["Ref"]]["LCSC"], 0)) % 360
+            w.writerow([r["Ref"], r["PosX"] + "mm", r["PosY"] + "mm", "Top", "%g" % rot])
     print("ok : %d fichiers Gerber et perçage, %d lignes de BOM (%d composants assemblés), %d à souder à la main"
           % (len(os.listdir(ger)), len(groups), len(smt), len(parts) - len(smt)))
 
